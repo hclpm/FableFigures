@@ -1,151 +1,117 @@
 <div align="center">
 
+<img src="build/icon.png" width="120" alt="Fable Figures">
+
 # Fable Figures
 
-**A BioRender‑style visual canvas editor for biology & biomedical figures — as a native desktop app.**
+A desktop editor for putting together biology and biomedical figures.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-informational.svg)](LICENSE)
 [![Electron](https://img.shields.io/badge/Electron-30-47848F.svg?logo=electron&logoColor=white)](https://www.electronjs.org/)
 ![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey.svg)
-![No build step](https://img.shields.io/badge/UI-vanilla%20JS%20%2B%20SVG-yellow.svg)
 
 </div>
 
-Fable Figures lets you compose publication‑ready scientific figures by dragging pre‑made
-biology assets, shapes, arrows and text onto an SVG canvas — no design skills required.
-The entire editor is **framework‑free JavaScript rendering an SVG document**, wrapped in a
-small **Electron** shell for a native desktop experience (with native Save/PDF/folder
-dialogs). It also runs straight from a browser for quick hacking.
+Fable Figures is a small desktop app for building scientific figures — the kind you'd
+otherwise put together in BioRender or Illustrator. You drag shapes, cell icons, arrows
+and text onto a canvas, arrange them, and export to PNG, SVG or PDF.
 
-> Replace `YOUR_USERNAME` in the clone URL and in `package.json` with your GitHub handle.
+It's deliberately simple under the hood: the whole editor is plain JavaScript drawing an
+SVG document, with a thin Electron wrapper so it runs as a real desktop window (and can
+use native save/PDF dialogs). There's no bundler and no build step for the UI — you can
+open `app/index.html` in a browser and it just works.
 
----
+## What's in it
 
-## ✨ Features
+- A library of ready-made assets: shapes, arrows/connectors, biology icons (cells,
+  organelles, gut epithelium, immune cells, organoids, molecules), lab equipment, human
+  and cohort figures, and organs.
+- Connectors that attach to a shape's edge and stay attached when you move, resize or
+  rotate it.
+- Multi-object presets you can drop in with one click — cells, common plots (PCA, UMAP,
+  line, bar), study cohorts, and neural-network diagrams — plus your own saved layouts.
+- The usual editing: multi-select, group resize/rotate, align and distribute, z-order,
+  copy/paste, duplicate, and undo/redo.
+- Text with fonts, weight, style, alignment and color, edited inline on the canvas.
+- Optional AI image generation from a text prompt.
+- Local projects with autosave and thumbnails, plus a templates export/import so you can
+  move your library between machines.
+- Light/dark mode, a few canvas themes and artboard sizes, and an English/Korean UI.
 
-- **Rich asset library** — 30+ shapes, 8 arrow/connector styles, dozens of biology icons
-  (cells, organelles, gut epithelium, immune cells, organoids, molecules), lab equipment,
-  human/cohort figures, and organs. Full‑color, matte illustrations.
-- **Smart connectors** — arrows snap to **ports** placed a uniform gap outside a shape's
-  outline (circular for circles/ellipses, rectangular otherwise) and follow the shape as
-  it moves, resizes, or rotates. Arrowheads render cleanly (the line stops at the head).
-- **Multi‑object presets** — one‑click cells, plots (PCA / UMAP / line / bar), study
-  cohorts, and neural‑network diagrams (MLP, CNN, autoencoder, transformer, GNN), plus
-  your own saved layouts as reusable presets.
-- **Full editing** — move / resize / rotate, marquee & Shift/⌘ multi‑select, group
-  resize & rotate, align / distribute, z‑order, cascading copy/paste, duplicate, undo/redo.
-- **Text** with fonts, size, bold/italic/underline, alignment and color; inline editing
-  on the canvas.
-- **AI images** — generate figure elements from a text prompt (via a free image service).
-- **Export** to **PNG / SVG / PDF** at multiple resolutions.
-- **Projects** — local autosave, thumbnails, duplicate, and portable **Templates
-  export/import** (`.json`) to move your library between machines.
-- **Polish** — light/dark mode, canvas themes, artboard sizes, and a bilingual UI
-  (English default, Korean optional).
+## Getting started
 
----
-
-## 🚀 Quick start
-
-Requires **[Node.js](https://nodejs.org) 18+**.
+You'll need [Node.js](https://nodejs.org) 18 or newer.
 
 ```bash
 git clone https://github.com/YOUR_USERNAME/fable-figures.git
 cd fable-figures
-npm install       # downloads Electron (~one‑time)
-npm start         # opens the desktop window
+npm install
+npm start
 ```
 
-**No‑install preview:** just open `app/index.html` in any modern browser. Everything
-except the Electron‑only bits (native Save dialog, PDF via `printToPDF`, folder picker,
-file‑based storage) works, and edits show up on refresh — handy for fast UI iteration.
+`npm install` pulls in Electron (a one-time download); `npm start` opens the app window.
 
----
+If you just want to poke at the UI, open `app/index.html` in a browser instead. Everything
+works except the parts that need the desktop shell (native save dialog, PDF export, the
+folder picker, and file-based storage).
 
-## 📦 Building installers
+## Building an app / installer
 
-[electron‑builder](https://www.electron.build/) is preconfigured:
+electron-builder is already configured:
 
 ```bash
-npm run dist:mac      # → release/  (.dmg + .zip)
-npm run dist:win      # → release/  (NSIS installer + portable .exe)
-npm run dist:linux    # → release/  (AppImage)
+npm run dist:mac      # .dmg and .zip in release/
+npm run dist:win      # NSIS installer and portable .exe
+npm run dist:linux    # AppImage
 ```
 
-Builds are **unsigned** by default. On macOS, first launch shows a Gatekeeper warning —
-right‑click → Open, or System Settings → Privacy & Security → Open Anyway. For
-warning‑free distribution, sign & notarize with an Apple Developer ID.
+The output in `release/` is a normal, double-clickable app — the person installing it
+doesn't need Node or this repo. Builds are unsigned, so on first launch macOS will warn
+about an unidentified developer (right-click → Open, or allow it under System Settings →
+Privacy & Security). Signing and notarizing needs an Apple Developer account.
 
----
+## A few things worth knowing
 
-## 🎛️ Using it
+Shortcuts are the usual ones: Cmd+Z / Shift+Cmd+Z to undo/redo, Cmd+C/V/D, Cmd+A to select
+all, Cmd+E to export, Cmd+S to save, Cmd+plus/minus/0 to zoom, arrow keys to nudge.
+Double-click an empty spot on the canvas to add text; drag an arrow's endpoint onto a
+shape to connect them.
 
-- **Drag** an asset from the left library onto the canvas (or double‑click it to drop at
-  center). **Double‑click empty canvas** to add text.
-- **Select** to edit in the right‑hand **Properties** panel; drag a marquee or Shift/⌘‑click
-  for multi‑select.
-- **Connect** two shapes: grab an arrow's endpoint and drop it on a shape's port.
-- Common shortcuts: ⌘Z / ⇧⌘Z undo/redo, ⌘C/⌘V/⌘D copy/paste/duplicate, ⌘A select‑all,
-  ⌘E export, ⌘S save, ⌘±/⌘0 zoom, arrow keys nudge.
-
----
-
-## 🗂️ Project structure
+## Project layout
 
 ```
-fable-figures/
-├── main.js            Electron main process (window, dock icon, IPC handlers)
-├── preload.js         contextBridge → window.camrender (printPDF, saveFile, pickFolder, …)
-├── package.json       app metadata + electron-builder config
-├── build/             app icon(s)
-└── app/
-    ├── index.html     DOM shell (home screen, editor layout, modals)
-    ├── styles.css     all styling (light/dark)
-    ├── assets.js      asset catalog + i18n → window.CAM
-    ├── app.js         engine: state, rendering, connectors, presets, interaction
-    └── app2.js        UI: library, properties, export, projects, settings, templates
+main.js        Electron main process (window, IPC handlers)
+preload.js     bridge to the renderer (save, PDF, folder picker, storage)
+package.json   metadata + electron-builder config
+build/         app icons
+app/
+  index.html   layout: home screen, editor, dialogs
+  styles.css   styling (light/dark)
+  assets.js    asset catalog + translations (exposed as window.CAM)
+  app.js       the engine: state, rendering, connectors, presets, interaction
+  app2.js      the UI: library, properties, export, projects, settings
 ```
 
-The three `app/*.js` files load as plain `<script>` tags sharing one global scope — **no
-bundler, no transpile step**. Keep additions ES5‑friendly and global.
+The three files in `app/` load as ordinary script tags and share one global scope, so
+there's nothing to compile. If you're extending it: shapes live in `shapePath()` +
+`SHAPES`, icons in `ICONS`, presets in `buildPreset()`/`buildNetwork()`, and UI strings in
+the `I18N` map. Projects are stored in `localStorage` (or a folder you pick in Settings).
+Internal identifiers still use the project's old codename, `camrender`, for storage
+compatibility; the app itself is Fable Figures.
 
----
+## Data and privacy
 
-## 🏗️ Architecture (in one screen)
+Everything is stored locally — nothing leaves your machine. The one exception is the
+optional AI image feature, which sends the prompt text to a third-party service
+([Pollinations](https://pollinations.ai)); it needs internet and can be swapped out in
+`genAI()` if you'd rather use something else.
 
-- **State** — `state = { objs, sel, view, bg, uploads, art }`; objects are
-  `{id, type:'shape'|'icon'|'image'|'text'|'connector', x, y, w, h, rot, opacity, … }`
-  (x/y = center). Undo/redo uses JSON snapshots.
-- **Rendering** — `render()` serializes `state.objs` to SVG inside `#objlayer`;
-  `renderOverlay()` draws selection handles / group box / connector ports.
-- **Connectors** — `connEndpoints()` + `portWorld()`/`shapePortsLocal()` compute
-  uniform‑gap ports; `connectorMarkup()` draws the line and arrowheads.
-- **Presets** — `buildPreset()` / `buildNetwork()` return arrays of objects.
-- **Persistence** — projects live in `localStorage` (key `camrender.projects`) or, when a
-  project folder is set, in `<folder>/fable-figures-library.json` via Electron IPC.
-- **Extending** — add a shape (`shapePath()` + `SHAPES`), an icon (`ICONS` + `ICON_SIZES`
-  + a group), a preset (`buildPreset()` + a catalog entry), or a language string (`I18N`).
+## Contributing
 
-> Internal identifiers keep the project's original codename (`camrender`) for storage
-> compatibility; the product name is **Fable Figures**.
+Issues and pull requests are welcome. Since there's no build step, the loop is just edit,
+refresh (or restart `npm start`), and check. A quick `node --check app/*.js` before you
+commit doesn't hurt.
 
----
+## License
 
-## 🔒 Data & privacy
-
-- All projects are stored **locally** — nothing is uploaded.
-- The optional **AI image** feature sends your prompt text to a free third‑party image
-  service ([Pollinations](https://pollinations.ai)); it needs internet and can be swapped
-  out in `genAI()` (`app/app2.js`). Don't use it for confidential text.
-
----
-
-## 🤝 Contributing
-
-Issues and pull requests are welcome. Because there's no build step, the workflow is
-simply: edit `app/*.js` / `app/*.css`, refresh the browser (or restart `npm start`), and
-verify. Please keep the code framework‑free and run a quick `node --check app/*.js`.
-
-## 📄 License
-
-[MIT](LICENSE) © Lee
+[MIT](LICENSE)
