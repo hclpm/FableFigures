@@ -43,8 +43,8 @@ open `app/index.html` in a browser and it just works.
 You'll need [Node.js](https://nodejs.org) 18 or newer.
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/fable-figures.git
-cd fable-figures
+git clone https://github.com/hclpm/fablefigures.git
+cd fablefigures
 npm install
 npm start
 ```
