@@ -1,0 +1,78 @@
+{
+  "name": "fable-figures",
+  "productName": "Fable Figures",
+  "version": "2.0.0",
+  "description": "A BioRender-style visual canvas editor for biology & biomedical figures — Electron desktop app.",
+  "main": "main.js",
+  "author": "Lee",
+  "license": "MIT",
+  "homepage": "https://github.com/YOUR_USERNAME/fable-figures#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR_USERNAME/fable-figures.git"
+  },
+  "bugs": {
+    "url": "https://github.com/YOUR_USERNAME/fable-figures/issues"
+  },
+  "keywords": [
+    "electron",
+    "svg",
+    "figures",
+    "biology",
+    "bioinformatics",
+    "biomedical",
+    "diagram",
+    "editor",
+    "biorender",
+    "canvas"
+  ],
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder",
+    "dist:mac": "electron-builder --mac",
+    "dist:win": "electron-builder --win",
+    "dist:linux": "electron-builder --linux"
+  },
+  "devDependencies": {
+    "electron": "^30.5.1",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.lee.fablefigures",
+    "productName": "Fable Figures",
+    "icon": "build/icon.png",
+    "files": [
+      "main.js",
+      "preload.js",
+      "build/**/*",
+      "app/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "build/icon.png",
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "dmg": {
+      "title": "Fable Figures",
+      "icon": "build/icon.png"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ]
+    }
+  }
+}

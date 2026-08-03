@@ -1,0 +1,20 @@
+# dependencies
+node_modules/
+
+# build output
+release/
+dist/
+
+# private runtime (used by the standalone launcher scripts, not needed for git)
+.runtime/
+
+# logs
+*.log
+npm-debug.log*
+yarn-error.log*
+
+# OS / editor cruft
+.DS_Store
+.Rhistory
+.env
+*.swp

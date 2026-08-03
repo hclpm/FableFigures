@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fable Figures</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ================= HOME / START SCREEN ================= -->
+<div id="home">
+  <div class="home-top">
+    <button class="lang" id="homeLang">한국어</button>
+    <button class="gear" id="homeGear" title="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg></button>
+    <div class="logo"><svg viewBox="0 0 24 24" fill="none"><circle cx="6" cy="6" r="2.4" fill="#fff"/><circle cx="18" cy="7" r="2.4" fill="#fff"/><circle cx="12" cy="17" r="2.4" fill="#fff"/><path d="M6.8 7.4 11.2 15M17.2 8.2 12.8 15.2M8 6.4h8" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+    <h1>Fable Figures</h1>
+    <div class="tag" id="homeTag">Crafted by Lee</div>
+  </div>
+  <div class="home-body">
+    <div class="home-actions">
+      <button class="new-card" id="newProjectBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg><span id="newProjectLbl">New project</span></button>
+    </div>
+    <div class="home-sec" id="recentLbl">Your projects</div>
+    <div class="proj-grid" id="projGrid"></div>
+  </div>
+</div>
+
+<!-- ================= EDITOR ================= -->
+<div id="editor" class="hidden">
+  <div class="topbar">
+    <button class="home-btn" id="homeBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 11l9-8 9 8M5 10v10h14V10" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="homeBtnLbl">Home</span></button>
+    <div class="tdivider"></div>
+    <div class="brandmini"><div class="mk"><svg viewBox="0 0 24 24" fill="none"><circle cx="6" cy="6" r="2.4" fill="#fff"/><circle cx="18" cy="7" r="2.4" fill="#fff"/><circle cx="12" cy="17" r="2.4" fill="#fff"/><path d="M6.8 7.4 11.2 15M17.2 8.2 12.8 15.2M8 6.4h8" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/></svg></div></div>
+    <input class="proj-name" id="projName" value="Untitled" spellcheck="false">
+    <div class="tdivider"></div>
+    <button class="ticon" id="undoBtn" title="Undo (Cmd/Ctrl+Z)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 7L4 12l5 5M4 12h11a5 5 0 010 10h-1" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <button class="ticon" id="redoBtn" title="Redo (Cmd/Ctrl+Shift+Z)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 7l5 5-5 5M20 12H9a5 5 0 000 10h1" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <div class="tdivider"></div>
+    <button class="ticon" id="addTextBtn" title="Add text box (or double-click the canvas)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 6h14M12 6v13M9 19h6" stroke-linecap="round"/></svg></button>
+    <div class="tspacer"></div>
+    <div class="menu-wrap">
+      <button class="tbtn" id="tmplBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Templates</button>
+      <div class="menu" id="tmplMenu">
+        <div class="mh">Template</div>
+        <button data-tmpl="crypt">Crypt–Villus axis</button>
+        <button data-tmpl="blank">Clear canvas</button>
+      </div>
+    </div>
+    <button class="tbtn" id="saveBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h11l3 3v13H5z" stroke-linejoin="round"/><path d="M8 4v6h7V4M8 20v-6h8v6" stroke-linejoin="round"/></svg>Save</button>
+    <button class="tbtn primary" id="exportBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 4v12m0 0l-4-4m4 4l4-4M5 20h14" stroke-linecap="round" stroke-linejoin="round"/></svg>Export</button>
+    <button class="ticon" id="settingsBtn" title="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg></button>
+  </div>
+
+  <div class="body">
+    <div class="leftpanel">
+      <div class="libtabs" id="libtabs"></div>
+      <div class="libsearch" id="libsearchWrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4" stroke-linecap="round"/></svg>
+        <input id="libsearch" placeholder="Search assets…">
+      </div>
+      <div class="libscroll" id="libscroll"></div>
+    </div>
+
+    <div class="canvaswrap" id="canvaswrap">
+      <svg class="stage" id="stage" xmlns="http://www.w3.org/2000/svg">
+        <g id="content"><g id="bglayer"></g><g id="objlayer"></g><g id="overlay"></g></g>
+      </svg>
+    </div>
+
+    <div class="rightpanel" id="rightpanel"></div>
+  </div>
+
+  <div class="statusbar">
+    <button class="autosave-pill" id="autosaveToggle" title="Toggle autosave (saves every 5 min)"><span class="dot"></span><span id="autosaveLbl">Autosave</span></button>
+    <span id="statusObj"></span>
+    <div class="right">
+      <span id="autosaveInd" style="opacity:.7"></span>
+      <button class="zoombtn" id="zoomOut">−</button>
+      <span class="zval" id="zoomVal">100%</span>
+      <button class="zoombtn" id="zoomIn">+</button>
+      <button class="zoombtn" id="zoomFit" style="width:auto;padding:0 7px;font-size:11px">Fit</button>
+    </div>
+  </div>
+</div>
+
+<!-- context menu -->
+<div class="ctxmenu" id="ctxmenu"></div>
+
+<!-- settings modal -->
+<div class="modal-back" id="settingsModal">
+  <div class="modal">
+    <h2 id="setTitle">Settings</h2>
+    <div class="msub" id="setSub">Preferences apply across all projects.</div>
+    <div class="modal-body">
+      <div class="field"><label id="setLangLbl">Language</label><div class="seg" id="setLang"><button data-lang="en">English</button><button data-lang="ko">한국어</button></div></div>
+      <div class="field"><label id="setAppearLbl">Appearance</label><div class="seg" id="setAppear"><button data-appear="light">Light</button><button data-appear="dark">Dark</button></div></div>
+      <div class="field"><label id="setThemeLbl">Canvas theme</label><div class="seg" id="setTheme"><button data-theme="ivory">Ivory</button><button data-theme="white">White</button><button data-theme="slate">Slate</button></div></div>
+      <div class="field"><label id="setArtLbl">Default artboard</label><select class="num" id="setArt"></select></div>
+      <div class="field"><label id="setFolderLbl">Project folder</label><div style="display:flex;gap:8px;align-items:center"><span id="setFolderPath" style="flex:1;font-size:11.5px;color:var(--subtle);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span><button class="bigbtn" id="setFolderChange" style="height:30px;padding:0 12px">Change…</button><button class="bigbtn" id="setFolderDefault" style="height:30px;padding:0 12px">App storage</button></div></div>
+      <div class="field"><label id="setTmplLbl">Templates</label><div style="display:flex;gap:8px;align-items:center"><span id="setTmplHint" style="flex:1;font-size:11.5px;color:var(--subtle)"></span><button class="bigbtn" id="setTmplExport" style="height:30px;padding:0 12px">Export…</button><button class="bigbtn" id="setTmplImport" style="height:30px;padding:0 12px">Import…</button></div></div>
+    </div>
+    <div class="modal-foot"><button class="bigbtn primary" id="setDone">Done</button></div>
+  </div>
+</div>
+
+<!-- export modal -->
+<div class="modal-back" id="exportModal">
+  <div class="modal">
+    <h2 id="expTitle">Export</h2>
+    <div class="msub" id="expSub">Choose a format and resolution.</div>
+    <div class="modal-body">
+      <div class="field"><label id="expFmtLbl">Format</label><div class="seg" id="expFmt"><button data-fmt="png" class="on">PNG</button><button data-fmt="pdf">PDF</button><button data-fmt="svg">SVG</button></div></div>
+      <div class="field" id="expResField"><label id="expResLbl">Resolution</label><div class="seg" id="expRes"><button data-scale="1">1× (72)</button><button data-scale="2" class="on">2× (144)</button><button data-scale="4">4× (288)</button><button data-scale="6">6× HiDPI</button></div></div>
+      <div class="msub" id="expDim" style="padding:0;color:var(--subtle)"></div>
+    </div>
+    <div class="modal-foot"><button class="bigbtn" id="expCancel">Cancel</button><button class="bigbtn primary" id="expGo">Export</button></div>
+  </div>
+</div>
+
+<!-- save name modal -->
+<div class="modal-back" id="nameModal">
+  <div class="modal">
+    <h2 id="nameTitle">Save project</h2>
+    <div class="modal-body">
+      <div class="field"><label id="nameLbl">Project name</label><input class="num" id="nameInput" style="height:40px;font-size:14px" spellcheck="false"></div>
+    </div>
+    <div class="modal-foot"><button class="bigbtn" id="nameCancel">Cancel</button><button class="bigbtn primary" id="nameOk">Save</button></div>
+  </div>
+</div>
+
+<!-- save-confirm modal -->
+<div class="modal-back" id="confirmModal">
+  <div class="modal">
+    <h2 id="cfTitle">Unsaved changes</h2>
+    <div class="msub" id="cfSub">You have unsaved changes. Save before leaving?</div>
+    <div class="modal-foot">
+      <button class="bigbtn" id="cfCancel">Cancel</button>
+      <button class="bigbtn danger" id="cfDiscard">Discard</button>
+      <button class="bigbtn primary" id="cfSave">Save &amp; go home</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="uploadInput" accept="image/*,.svg,image/svg+xml" multiple style="display:none">
+<input type="file" id="tmplFile" accept=".json,application/json" style="display:none">
+<div class="toast" id="toast"></div>
+
+<script src="assets.js"></script>
+<script src="app.js"></script>
+<script src="app2.js"></script>
+</body>
+</html>
