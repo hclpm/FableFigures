@@ -14,7 +14,7 @@ function createWindow() {
     height: 940,
     minWidth: 1080,
     minHeight: 680,
-    backgroundColor: "#26251F",
+    backgroundColor: "#F3F5F6",
     icon: ICON_PATH,
     title: "Fable Figures",
     titleBarStyle: process.platform === "darwin" ? "hiddenInset" : "default",
