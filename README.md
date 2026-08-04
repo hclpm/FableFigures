@@ -21,6 +21,11 @@ SVG document, with a thin Electron wrapper so it runs as a real desktop window (
 use native save/PDF dialogs). There's no bundler and no build step for the UI — you can
 open `app/index.html` in a browser and it just works.
 
+## Why "Fable Figures"?
+
+The name is a nod to how it was built: much of the app was written with Anthropic's Claude
+**Fable** model.
+
 ## What's in it
 
 - A library of ready-made assets: shapes, arrows/connectors, biology icons (cells,
