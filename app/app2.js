@@ -252,23 +252,6 @@ function loadTemplate(kind){
     return;
   }
 }
-/* Built-in Crypt–Villus axis: assembled from real, individually-editable cell objects. */
-function buildCryptVillus(){
-  pushHistory();state.objs=[];state.sel=[];
-  const IC=(k,x,y,w,h,rot)=>{const o=mkIcon(k,x,y,w,h);if(rot)o.rot=rot;state.objs.push(o);return o;};
-  const TX=(x,y,t,s,w,col,wt)=>{const o=mkText(x,y,t,s,col,w);if(wt)o.weight=wt;state.objs.push(o);return o;};
-  const cx=800;
-  TX(cx,90,"Crypt – Villus Axis",30,600,"#26251F",700);
-  // up=+1 → ∩ villus dome ; up=-1 → ∪ crypt smile ; rotation ∝ horizontal offset (fan)
-  const arch=(list,cxA,yBase,spacing,curv,tilt,up,w,h)=>{const N=list.length;for(let i=0;i<N;i++){const dx=(i-(N-1)/2)*spacing;IC(list[i],cxA+dx,yBase+up*curv*dx*dx,w,h,tilt*dx);}};
-  arch(["enterocyte","goblet","enterocyte","enterocyte","tuft","enterocyte","enterocyte","goblet","enterocyte"],cx,214,40,0.0055,0.16,1,46,88);
-  TX(cx,150,"Villus",20,260,"#6B675D",700);
-  arch(["transitamp","transitamp","transitamp","transitamp","transitamp"],cx,474,48,0,0,1,46,82);
-  arch(["iecstem","paneth","iecstem","paneth","iecstem","paneth","iecstem"],cx,604,46,0.0045,0.14,-1,48,88);
-  TX(cx,706,"Crypt",20,260,"#6B675D",700);
-  TX(cx,732,"alternating stem (teal) + Paneth (pink) cells",12,440,"#8C887D");
-  centerObjs();fitView();renderProps();updateUndo();markDirty();toast("Crypt–Villus template");
-}
 function setArtboard(key){const ab=ARTBOARDS[key];if(!ab)return;ART.w=ab.w;ART.h=ab.h;state.art=key;fitView();markDirty();toast(ab.label);}
 
 /* ============================ EXPORT (#6) ============================ */

@@ -253,7 +253,7 @@
       "id": "iecstem",
       "label": "Stem cell",
       "file": "iecstem.svg",
-      "description": "Slender crypt-base columnar stem cell wedged between Paneth cells with basal nucleus and scant cytoplasm.",
+      "description": "Single slender crypt-base columnar stem cell with a narrow apical surface, gently tapered body, basal oval nucleus, and sparse cytoplasmic organelles.",
       "biologicalBasis": "LGR5-positive crypt-base columnar stem cells alternate with Paneth cells and continuously generate the intestinal epithelial lineages."
     },
     {
@@ -638,8 +638,8 @@
       "id": "mouse",
       "label": "Mouse model",
       "file": "mouse.svg",
-      "description": "Laboratory mouse in side profile with detailed ear, eye, whiskers, paws, tail, and body contour.",
-      "biologicalBasis": "The laboratory mouse has a compact rodent body plan with prominent pinnae, vibrissae, digit-bearing paws, and a long tapering tail."
+      "description": "Upright laboratory mouse in three-quarter frontal view with paired pinnae, dark eye, pink nose, vibrissae, forepaws held at the chest, grounded hind paws, pear-shaped body, and a long horizontal tail.",
+      "biologicalBasis": "The laboratory mouse has a compact rodent body plan with prominent pinnae, vibrissae, small digit-bearing forepaws, weight-bearing hind feet, and a long tapering tail."
     },
     {
       "id": "target",

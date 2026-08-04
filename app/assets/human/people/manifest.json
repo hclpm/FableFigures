@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "style": "matte scientific human figures",
+  "icons": [
+    {
+      "id": "person",
+      "label": "Person",
+      "file": "person.svg",
+      "size": [
+        74,
+        126
+      ],
+      "description": "Adult human in a neutral anterior stance with restrained facial detail, relaxed arms, separated legs, and publication-weight outlines.",
+      "designBasis": "Near-anatomical proportions and a neutral pose make the figure suitable for cohorts, interventions, and clinical study diagrams without implying emotion or diagnosis."
+    },
+    {
+      "id": "personF",
+      "label": "Person (f)",
+      "file": "personF.svg",
+      "size": [
+        74,
+        126
+      ],
+      "description": "Adult female human in a neutral anterior stance, wearing trousers rather than a symbolic skirt, with subtle shoulder, waist, and pelvic proportions.",
+      "designBasis": "Sex presentation is conveyed through restrained proportional and hair cues instead of restroom-sign conventions, keeping the figure appropriate for scientific graphics."
+    },
+    {
+      "id": "patient",
+      "label": "Patient",
+      "file": "patient.svg",
+      "size": [
+        78,
+        126
+      ],
+      "description": "Neutral standing patient wearing a hospital gown, identification wristband, socks, and open-back seam details.",
+      "designBasis": "A gown and wristband communicate clinical-patient context without using a large medical cross or depicting illness severity."
+    },
+    {
+      "id": "doctor",
+      "label": "Clinician",
+      "file": "doctor.svg",
+      "size": [
+        82,
+        126
+      ],
+      "description": "Front-facing clinician wearing scrubs and a white coat with stethoscope, identification badge, pockets, and closed shoes.",
+      "designBasis": "Recognizable clinical garments and equipment distinguish the role while a neutral pose avoids caricature or specialty-specific assumptions."
+    },
+    {
+      "id": "dna_person",
+      "label": "Genomic subject",
+      "file": "dna_person.svg",
+      "size": [
+        78,
+        126
+      ],
+      "description": "Neutral research participant with a restrained DNA double-helix overlay contained within the torso.",
+      "designBasis": "The participant remains visually primary while the internal helix denotes genomic sampling or stratification without implying that DNA is anatomically visible."
+    }
+  ]
+}
