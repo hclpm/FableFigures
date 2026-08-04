@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="title desc">
+  <title id="title">Erythrocyte</title>
+  <desc id="desc">Anucleate red biconcave disc with a broad rim and pale central depression. Biological basis: The biconcave membrane maximizes surface-area-to-volume ratio and deformability while mature mammalian erythrocytes lack nuclei and organelles.</desc>
+  <metadata>{"id":"erythrocyte","label":"Erythrocyte","description":"Anucleate red biconcave disc with a broad rim and pale central depression.","biologicalBasis":"The biconcave membrane maximizes surface-area-to-volume ratio and deformability while mature mammalian erythrocytes lack nuclei and organelles."}</metadata>
+  <defs><linearGradient id="bodyerythrocyte" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F58E86"/><stop offset="1" stop-color="#D4514D"/></linearGradient></defs><ellipse cx="50" cy="50" rx="39" ry="31" fill="url(#bodyerythrocyte)" stroke="#A83B39" stroke-width="2.5"/><ellipse cx="50" cy="50" rx="21" ry="13" fill="#ED7D76" stroke="#BD4946" stroke-width="1.5"/><ellipse cx="50" cy="50" rx="12" ry="6" fill="#F3A29B"/>
+</svg>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="title desc">
+  <title id="title">Antibody</title>
+  <desc id="desc">Y-shaped IgG with paired heavy chains, paired light chains, hinge, Fc stem, and two antigen-binding tips. Biological basis: Immunoglobulin heavy and light variable domains form two antigen-binding sites, while the Fc region recruits immune effector mechanisms.</desc>
+  <metadata>{"id":"antibody","label":"Antibody","description":"Y-shaped IgG with paired heavy chains, paired light chains, hinge, Fc stem, and two antigen-binding tips.","biologicalBasis":"Immunoglobulin heavy and light variable domains form two antigen-binding sites, while the Fc region recruits immune effector mechanisms."}</metadata>
+  <path d="M50 88V53M50 55L22 20M50 55l28-35" fill="none" stroke="#D26F76" stroke-width="10" stroke-linecap="round"/><path d="M50 55L27 25M50 55l23-30" fill="none" stroke="#F4B5B1" stroke-width="4" stroke-linecap="round"/><path d="M45 54h10M46 59h8" stroke="#8F4E57" stroke-width="1.4"/><circle cx="22" cy="19" r="3" fill="#E3B45E"/><circle cx="78" cy="19" r="3" fill="#E3B45E"/>
+</svg>

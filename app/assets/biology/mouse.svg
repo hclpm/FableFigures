@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="title desc">
+  <title id="title">Mouse model</title>
+  <desc id="desc">Laboratory mouse in side profile with detailed ear, eye, whiskers, paws, tail, and body contour. Biological basis: The laboratory mouse has a compact rodent body plan with prominent pinnae, vibrissae, digit-bearing paws, and a long tapering tail.</desc>
+  <metadata>{"id":"mouse","label":"Mouse model","description":"Laboratory mouse in side profile with detailed ear, eye, whiskers, paws, tail, and body contour.","biologicalBasis":"The laboratory mouse has a compact rodent body plan with prominent pinnae, vibrissae, digit-bearing paws, and a long tapering tail."}</metadata>
+  <path d="M17 59c4-19 23-30 44-23 16 5 19 18 11 29-9 13-36 18-50 7-4-3-6-8-5-13z" fill="#E5DDD4" stroke="#8A7A70" stroke-width="2.2"/><circle cx="70" cy="44" r="10" fill="#E5DDD4" stroke="#8A7A70" stroke-width="2"/><circle cx="76" cy="41" r="2" fill="#333"/><circle cx="66" cy="34" r="7" fill="#E8B2B0" stroke="#8A7A70"/><path d="M20 66C6 76 5 88 17 90" fill="none" stroke="#B58C89" stroke-width="2"/><path d="M38 73l-4 10M57 73l4 10" stroke="#8A7A70" stroke-width="2"/><path d="M78 45l12-4M78 48l13 2M75 66l8 8M33 70l-4 10M53 73l5 8" stroke="#8A7A70" stroke-width="1"/>
+</svg>

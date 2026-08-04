@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="title desc">
+  <title id="title">Fibroblast</title>
+  <desc id="desc">Spread spindle fibroblast with tapering processes, elongated nucleus, actin fibers, rough ER, and secreted collagen fibers. Biological basis: Activated fibroblasts spread on extracellular matrix and synthesize collagen-rich matrix using expanded rough ER and Golgi.</desc>
+  <metadata>{"id":"fibroblast","label":"Fibroblast","description":"Spread spindle fibroblast with tapering processes, elongated nucleus, actin fibers, rough ER, and secreted collagen fibers.","biologicalBasis":"Activated fibroblasts spread on extracellular matrix and synthesize collagen-rich matrix using expanded rough ER and Golgi."}</metadata>
+  <defs><linearGradient id="bodyfibroblast" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E5C9DF"/><stop offset="1" stop-color="#A77FA1"/></linearGradient></defs><path d="M5 58c18-4 23-19 39-21 17-2 25 7 51-1-19 10-20 24-41 27-18 3-28-5-49-5z" fill="url(#bodyfibroblast)" stroke="#7F5C7B" stroke-width="2"/><ellipse cx="51" cy="50" rx="15" ry="8" fill="#654D69" transform="rotate(-8 51 50)"/><path d="M9 72q32-21 82-9M12 79q35-20 76-11" fill="none" stroke="#8BA28B" stroke-width="1.4"/><path d="M28 49h45M33 55h35" stroke="#7D5877" stroke-width="1"/>
+</svg>

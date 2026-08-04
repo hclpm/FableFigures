@@ -8,6 +8,9 @@ dist/
 # private runtime (used by the standalone launcher scripts, not needed for git)
 .runtime/
 
+# local redesign history / scratch (not a deliverable)
+backups/
+
 # logs
 *.log
 npm-debug.log*

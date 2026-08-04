@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="title desc">
+  <title id="title">Workstation</title>
+  <desc id="desc">Scientific workstation with monitor, plotted analysis, keyboard, mouse, tower, and data indicators. Biological basis: A workstation icon is grounded by recognizable input devices and a display showing scientific analysis rather than a generic screen glyph.</desc>
+  <metadata>{"id":"computer","label":"Workstation","description":"Scientific workstation with monitor, plotted analysis, keyboard, mouse, tower, and data indicators.","biologicalBasis":"A workstation icon is grounded by recognizable input devices and a display showing scientific analysis rather than a generic screen glyph."}</metadata>
+  <rect x="12" y="15" width="76" height="54" rx="5" fill="#D9E2E5" stroke="#53616B" stroke-width="2.4"/><rect x="19" y="22" width="62" height="39" fill="#213B48"/><path d="M25 52l9-9 9 5 9-16 10 12 13-15" fill="none" stroke="#68CCD0" stroke-width="2"/><circle cx="29" cy="31" r="2" fill="#E68B83" /><circle cx="40" cy="37" r="2" fill="#E68B83" /><circle cx="55" cy="29" r="2" fill="#E68B83" /><circle cx="68" cy="48" r="2" fill="#E68B83" /><path d="M44 69v10M56 69v10M32 80h36" stroke="#53616B" stroke-width="4"/>
+</svg>

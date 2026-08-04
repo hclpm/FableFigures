@@ -1,0 +1,659 @@
+{
+  "version": 2,
+  "generated": "2026-08-04",
+  "style": "matte detailed scientific illustration; no specular highlights",
+  "count": 86,
+  "references": [
+    {
+      "id": "m-cell-gp2",
+      "title": "Uptake through glycoprotein 2 of FimH+ bacteria by M cells initiates mucosal immune response",
+      "url": "https://www.nature.com/articles/nature08529",
+      "doi": "10.1038/nature08529",
+      "appliesTo": [
+        "mcell"
+      ]
+    },
+    {
+      "id": "m-cell-pocket",
+      "title": "M cell-derived vesicles suggest a unique pathway for trans-epithelial antigen delivery",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/25838974/",
+      "doi": "10.3389/fimmu.2015.00198",
+      "appliesTo": [
+        "mcell"
+      ]
+    },
+    {
+      "id": "paneth-amp",
+      "title": "Enteric Salmonella Infection Inhibits Paneth Cell Antimicrobial Peptide Expression",
+      "url": "https://journals.asm.org/doi/10.1128/iai.71.3.1109-1115.2003",
+      "doi": "10.1128/IAI.71.3.1109-1115.2003",
+      "appliesTo": [
+        "paneth"
+      ]
+    },
+    {
+      "id": "tuft-ultrastructure",
+      "title": "The intestinal tuft cell nanostructure in 3D",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/28490731/",
+      "doi": "10.1038/s41598-017-01520-x",
+      "appliesTo": [
+        "tuft"
+      ]
+    },
+    {
+      "id": "organoid-morphogenesis",
+      "title": "Mechanochemical bistability of intestinal organoids enables robust morphogenesis",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/40248571/",
+      "doi": "10.1038/s41567-025-02792-1",
+      "appliesTo": [
+        "organoid",
+        "organoid_dome",
+        "organoid_plate"
+      ]
+    }
+  ],
+  "icons": [
+    {
+      "id": "pluripotent",
+      "label": "Pluripotent stem",
+      "file": "pluripotent.svg",
+      "description": "Round embryonic stem cell with a very large central nucleus and scant teal cytoplasm.",
+      "biologicalBasis": "Pluripotent stem cells have a high nucleus-to-cytoplasm ratio, prominent nucleoli, and relatively sparse cytoplasmic specialization."
+    },
+    {
+      "id": "bloodstem",
+      "label": "Blood stem cell",
+      "file": "bloodstem.svg",
+      "description": "Round hematopoietic stem cell with a prominent nucleus, thin purple cytoplasm, and subtle membrane ruffles.",
+      "biologicalBasis": "Hematopoietic stem cells are non-adherent suspension cells; their compact morphology and limited cytoplasm distinguish them from mature myeloid cells."
+    },
+    {
+      "id": "lymphoidprog",
+      "label": "Lymphoid progenitor",
+      "file": "lymphoidprog.svg",
+      "description": "Small round common lymphoid progenitor with a large nucleus and light-blue cytoplasmic rim.",
+      "biologicalBasis": "Early lymphoid progenitors retain a high nucleus-to-cytoplasm ratio and lack the lineage-specific granules of mature leukocytes."
+    },
+    {
+      "id": "myeloidprog",
+      "label": "Myeloid progenitor",
+      "file": "myeloidprog.svg",
+      "description": "Round common myeloid progenitor with moderate nucleus and sparse azurophilic granules.",
+      "biologicalBasis": "Myeloid commitment is accompanied by increasing cytoplasm and the first primary granules before mature lineage-specific granulation develops."
+    },
+    {
+      "id": "tprecursor",
+      "label": "T-cell precursor",
+      "file": "tprecursor.svg",
+      "description": "Round T-cell precursor with a large nucleus, thin blue cytoplasm, and sparse immature surface receptors.",
+      "biologicalBasis": "T-lineage precursors are lymphoblast-like cells whose cytoplasm remains scant while receptor assembly and thymic selection proceed."
+    },
+    {
+      "id": "bprecursor",
+      "label": "B-cell precursor",
+      "file": "bprecursor.svg",
+      "description": "Round B-cell precursor with a large nucleus, thin green cytoplasm, and early B-lineage receptors.",
+      "biologicalBasis": "B-cell precursors are small lymphoid cells with condensed chromatin and limited cytoplasm before maturation into receptor-rich B cells."
+    },
+    {
+      "id": "nkcell",
+      "label": "NK cell",
+      "file": "nkcell.svg",
+      "description": "Round NK lymphocyte with an indented nucleus and a small set of dark cytotoxic granules.",
+      "biologicalBasis": "NK cells are large granular lymphocytes; perforin- and granzyme-containing lysosomal granules polarize toward target-cell contacts."
+    },
+    {
+      "id": "tcell",
+      "label": "T cell",
+      "file": "tcell.svg",
+      "description": "Small round T lymphocyte with a large nucleus, narrow blue cytoplasm, and distributed TCR complexes.",
+      "biologicalBasis": "Resting T cells are non-adherent lymphocytes with scant cytoplasm; T-cell receptors and CD3 complexes are distributed across the plasma membrane."
+    },
+    {
+      "id": "bcell",
+      "label": "B cell",
+      "file": "bcell.svg",
+      "description": "Small round B lymphocyte with a large nucleus and multiple Y-shaped membrane immunoglobulins.",
+      "biologicalBasis": "Mature B cells display clonally rearranged membrane immunoglobulin that captures cognate antigen and initiates receptor-mediated uptake."
+    },
+    {
+      "id": "plasma",
+      "label": "Plasma cell",
+      "file": "plasma.svg",
+      "description": "Oval plasma cell with eccentric clock-face nucleus, broad basophilic cytoplasm, rough ER, and perinuclear Golgi hof.",
+      "biologicalBasis": "Antibody-secreting plasma cells expand rough endoplasmic reticulum and Golgi; heterochromatin forms the characteristic cartwheel nucleus."
+    },
+    {
+      "id": "memory",
+      "label": "Memory cell",
+      "file": "memory.svg",
+      "description": "Compact memory lymphocyte with large nucleus, narrow deep-blue cytoplasm, and a small activation-memory marker.",
+      "biologicalBasis": "Quiescent memory lymphocytes resemble small resting lymphocytes but retain long-lived antigen-experienced receptor states."
+    },
+    {
+      "id": "immune",
+      "label": "Immune cell",
+      "file": "immune.svg",
+      "description": "Generic leukocyte with irregular lobed nucleus, cytoplasmic granules, and flexible cell membrane.",
+      "biologicalBasis": "Leukocytes use a deformable cortex for migration and lineage-dependent nuclear lobulation for movement through confined tissue spaces."
+    },
+    {
+      "id": "macrophage",
+      "label": "Macrophage",
+      "file": "macrophage.svg",
+      "description": "Large amoeboid macrophage with pseudopods, bean-shaped nucleus, phagosomes, lysosomes, and engulfed cargo.",
+      "biologicalBasis": "Macrophages extend actin-rich pseudopods around particles and route engulfed material through phagosomes to acidic lysosomes."
+    },
+    {
+      "id": "dendritic",
+      "label": "Dendritic cell",
+      "file": "dendritic.svg",
+      "description": "Irregular antigen-presenting cell with branching dendrites, central nucleus, endocytic vesicles, and MHC-bearing membrane.",
+      "biologicalBasis": "Conventional dendritic cells use extensive processes to sample tissue and present processed peptide on MHC to lymphocytes."
+    },
+    {
+      "id": "mast",
+      "label": "Mast cell",
+      "file": "mast.svg",
+      "description": "Round tissue mast cell packed with metachromatic secretory granules around a small central nucleus.",
+      "biologicalBasis": "Mast-cell granules store histamine, proteases, and other mediators that are rapidly released after receptor-driven activation."
+    },
+    {
+      "id": "neutrophil",
+      "label": "Neutrophil",
+      "file": "neutrophil.svg",
+      "description": "Round neutrophil with segmented 3–5-lobed nucleus and fine pale cytoplasmic granules.",
+      "biologicalBasis": "Mature neutrophils have a segmented nucleus for confined migration and distinct primary and secondary antimicrobial granules."
+    },
+    {
+      "id": "eosinophil",
+      "label": "Eosinophil",
+      "file": "eosinophil.svg",
+      "description": "Round eosinophil with bilobed nucleus and large red-orange specific granules.",
+      "biologicalBasis": "Eosinophil specific granules contain major basic protein and other effectors, producing the coarse eosinophilic appearance."
+    },
+    {
+      "id": "basophil",
+      "label": "Basophil",
+      "file": "basophil.svg",
+      "description": "Round basophil whose bilobed nucleus is partly obscured by large dark blue-purple granules.",
+      "biologicalBasis": "Basophil granules contain histamine and proteoglycans and often overlap the nucleus in conventional stained morphology."
+    },
+    {
+      "id": "monocyte",
+      "label": "Monocyte",
+      "file": "monocyte.svg",
+      "description": "Large monocyte with kidney-shaped nucleus, abundant grey-blue cytoplasm, and small vacuoles.",
+      "biologicalBasis": "Circulating monocytes have folded or reniform nuclei and lysosome-rich cytoplasm that supports differentiation into phagocytes."
+    },
+    {
+      "id": "erythrocyte",
+      "label": "Erythrocyte",
+      "file": "erythrocyte.svg",
+      "description": "Anucleate red biconcave disc with a broad rim and pale central depression.",
+      "biologicalBasis": "The biconcave membrane maximizes surface-area-to-volume ratio and deformability while mature mammalian erythrocytes lack nuclei and organelles."
+    },
+    {
+      "id": "megakaryocyte",
+      "label": "Megakaryocyte",
+      "file": "megakaryocyte.svg",
+      "description": "Very large marrow cell with polyploid multilobed nucleus and cytoplasmic extensions shedding platelets.",
+      "biologicalBasis": "Megakaryocytes form proplatelet extensions whose terminal cytoplasmic fragments enter marrow sinusoids as platelets."
+    },
+    {
+      "id": "platelets",
+      "label": "Platelets",
+      "file": "platelets.svg",
+      "description": "Cluster of small irregular anucleate platelet fragments with granules and short activation processes.",
+      "biologicalBasis": "Platelets are megakaryocyte-derived cytoplasmic fragments containing alpha and dense granules; activation produces filopodia."
+    },
+    {
+      "id": "enterocyte",
+      "label": "Enterocyte",
+      "file": "enterocyte.svg",
+      "description": "Tall packed absorptive enterocyte with apical brush border, terminal web, lateral junctions, elongated basal nucleus, and mitochondria.",
+      "biologicalBasis": "Enterocytes form a polarized columnar monolayer; dense apical microvilli increase absorptive surface while junctional complexes seal neighboring cells."
+    },
+    {
+      "id": "goblet",
+      "label": "Goblet cell",
+      "file": "goblet.svg",
+      "description": "Packed goblet cell with expanded apical mucin theca, narrow basal stalk, compressed basal nucleus, and secretion opening.",
+      "biologicalBasis": "Goblet cells package heavily glycosylated mucins into large apical granules that expand the cell apex and discharge into the lumen."
+    },
+    {
+      "id": "paneth",
+      "label": "Paneth cell",
+      "file": "paneth.svg",
+      "description": "Pyramidal crypt-base Paneth cell with basal nucleus, rough ER, and numerous bright apical antimicrobial granules.",
+      "biologicalBasis": "Paneth cells occupy the small-intestinal crypt base and secrete alpha-defensins, lysozyme, and other antimicrobials from apically concentrated dense-core granules."
+    },
+    {
+      "id": "endocrine",
+      "label": "Endocrine cell",
+      "file": "endocrine.svg",
+      "description": "Narrow enteroendocrine epithelial cell with apical sensing process and basal dense-core secretory granules facing a capillary.",
+      "biologicalBasis": "Enteroendocrine cells sense luminal cues and release peptide hormones basolaterally toward nerves and fenestrated capillaries."
+    },
+    {
+      "id": "tuft",
+      "label": "Tuft cell",
+      "file": "tuft.svg",
+      "description": "Narrow tuft cell with long stiff apical microvilli, actin rootlets, tubulovesicular network, and basal process.",
+      "biologicalBasis": "Tuft cells are polarized chemosensory epithelial cells defined by unusually long actin-supported microvilli and an apical tubulovesicular system."
+    },
+    {
+      "id": "transitamp",
+      "label": "Transit-amplifying",
+      "file": "transitamp.svg",
+      "description": "Packed crypt epithelial progenitor in mitosis with condensed chromosomes, spindle poles, and a beginning cleavage furrow.",
+      "biologicalBasis": "Transit-amplifying cells divide rapidly above the crypt stem-cell zone before differentiating along absorptive or secretory lineages."
+    },
+    {
+      "id": "iecstem",
+      "label": "Stem cell",
+      "file": "iecstem.svg",
+      "description": "Slender crypt-base columnar stem cell wedged between Paneth cells with basal nucleus and scant cytoplasm.",
+      "biologicalBasis": "LGR5-positive crypt-base columnar stem cells alternate with Paneth cells and continuously generate the intestinal epithelial lineages."
+    },
+    {
+      "id": "mcell",
+      "label": "M cell",
+      "file": "mcell.svg",
+      "description": "Follicle-associated epithelial M cell with flat sparse-microfold apex, captured antigen, transcytotic vesicles, and a basolateral lymphocyte pocket.",
+      "biologicalBasis": "M cells sample luminal particles and deliver them across the epithelium to lymphocytes and mononuclear phagocytes housed in a basolateral pocket."
+    },
+    {
+      "id": "organoid",
+      "label": "Organoid",
+      "file": "organoid.svg",
+      "description": "Budded epithelial organoid section with a continuous single-cell layer, central lumen, and crypt-like outward buds.",
+      "biologicalBasis": "Intestinal organoids organize as polarized epithelium surrounding a lumen; crypt domains bud outward as growth and lumen mechanics remodel the wall."
+    },
+    {
+      "id": "organoid_dome",
+      "label": "Organoid in Matrigel",
+      "file": "organoid_dome.svg",
+      "description": "Several budded organoids embedded at different depths inside a transparent extracellular-matrix dome.",
+      "biologicalBasis": "Matrigel or related matrices provide a 3D basement-membrane-like environment that supports organoid polarization and budding."
+    },
+    {
+      "id": "organoid_plate",
+      "label": "Organoids on plate",
+      "file": "organoid_plate.svg",
+      "description": "Top view of a culture well containing multiple organoids with variable lumen and budding morphology.",
+      "biologicalBasis": "Organoid cultures are morphologically heterogeneous, containing cystic, bulged, and crypt-budded structures within the same well."
+    },
+    {
+      "id": "muscle",
+      "label": "Muscle cell",
+      "file": "muscle.svg",
+      "description": "Long multinucleated skeletal muscle fiber with peripheral nuclei, repeated sarcomeric striations, and bundled myofibrils.",
+      "biologicalBasis": "Skeletal myofibers are syncytia; aligned sarcomeres create cross-striations while nuclei reside beneath the peripheral sarcolemma."
+    },
+    {
+      "id": "nerve",
+      "label": "Nerve cell",
+      "file": "nerve.svg",
+      "description": "Neuron with soma, nucleus and nucleolus, branching dendrites, axon hillock, myelinated axon segments, and terminal arbor.",
+      "biologicalBasis": "Neurons receive input through dendrites and conduct action potentials along axons; myelin is interrupted at nodes of Ranvier."
+    },
+    {
+      "id": "cardiac",
+      "label": "Cardiac cell",
+      "file": "cardiac.svg",
+      "description": "Branched cardiomyocyte with central nucleus, sarcomeric striations, mitochondria, and dark intercalated discs.",
+      "biologicalBasis": "Cardiomyocytes are branched striated cells joined end-to-end by intercalated discs containing mechanical and electrical junctions."
+    },
+    {
+      "id": "liver",
+      "label": "Liver cells",
+      "file": "liver.svg",
+      "description": "Hepatocyte plate with polygonal cells, central nuclei, binucleation, bile canaliculi, and adjacent sinusoid.",
+      "biologicalBasis": "Hepatocytes form one- to two-cell-thick plates; apical borders create bile canaliculi while basal surfaces face fenestrated sinusoids."
+    },
+    {
+      "id": "fibroblast",
+      "label": "Fibroblast",
+      "file": "fibroblast.svg",
+      "description": "Spread spindle fibroblast with tapering processes, elongated nucleus, actin fibers, rough ER, and secreted collagen fibers.",
+      "biologicalBasis": "Activated fibroblasts spread on extracellular matrix and synthesize collagen-rich matrix using expanded rough ER and Golgi."
+    },
+    {
+      "id": "stromal",
+      "label": "Stromal cell",
+      "file": "stromal.svg",
+      "description": "Irregular stellate stromal support cell with oval nucleus, long matrix-contacting processes, and extracellular fibers.",
+      "biologicalBasis": "Mesenchymal stromal cells extend processes through extracellular matrix and provide structural and paracrine niche support."
+    },
+    {
+      "id": "adipocyte",
+      "label": "Adipocyte",
+      "file": "adipocyte.svg",
+      "description": "Unilocular adipocyte with one dominant lipid droplet, extremely thin cytoplasmic rim, and peripheral flattened nucleus.",
+      "biologicalBasis": "White adipocytes store neutral lipid in one large droplet that displaces the nucleus and organelles to the cell periphery."
+    },
+    {
+      "id": "cell",
+      "label": "Cell",
+      "file": "cell.svg",
+      "description": "General eukaryotic cell with plasma membrane, cytoplasm, nucleus, nucleolus, mitochondria, ER, and Golgi.",
+      "biologicalBasis": "A eukaryotic cell is compartmentalized by membrane-bound organelles that separate genome maintenance, biosynthesis, trafficking, and energy production."
+    },
+    {
+      "id": "nucleus",
+      "label": "Nucleus",
+      "file": "nucleus.svg",
+      "description": "Nucleus with double envelope, nuclear pores, peripheral chromatin, euchromatin, and a dense nucleolus.",
+      "biologicalBasis": "The nuclear envelope is continuous with ER and perforated by pore complexes; nucleoli assemble ribosomal subunits within chromatin-containing nucleoplasm."
+    },
+    {
+      "id": "mitochondria",
+      "label": "Mitochondrion",
+      "file": "mitochondria.svg",
+      "description": "Cutaway mitochondrion with outer membrane, inner boundary membrane, folded cristae, matrix, and mitochondrial DNA.",
+      "biologicalBasis": "Oxidative-phosphorylation complexes occupy the cristae-rich inner membrane, while the matrix contains metabolic enzymes, ribosomes, and mitochondrial DNA."
+    },
+    {
+      "id": "er",
+      "label": "ER",
+      "file": "er.svg",
+      "description": "Interconnected rough ER cisternae continuous with the nuclear envelope and studded by cytosolic ribosomes.",
+      "biologicalBasis": "Rough ER ribosomes synthesize secreted and membrane proteins into flattened cisternae for folding and quality control."
+    },
+    {
+      "id": "golgi",
+      "label": "Golgi",
+      "file": "golgi.svg",
+      "description": "Polarized Golgi stack with cis and trans faces, flattened cisternae, and incoming and budding transport vesicles.",
+      "biologicalBasis": "Golgi cisternae modify and sort biosynthetic cargo as it moves from the cis entry face toward the trans-Golgi network."
+    },
+    {
+      "id": "vesicle",
+      "label": "Vesicle",
+      "file": "vesicle.svg",
+      "description": "Membrane-bound transport vesicle with lipid bilayer, luminal cargo, and a partial protein coat.",
+      "biologicalBasis": "Transport vesicles bud with selective coats and cargo adaptors, then fuse with target membranes using tethering and SNARE machinery."
+    },
+    {
+      "id": "dna",
+      "label": "DNA",
+      "file": "dna.svg",
+      "description": "Antiparallel double helix with sugar-phosphate backbones, paired bases, major groove, and minor groove.",
+      "biologicalBasis": "DNA stores information in complementary base pairing while the helical geometry creates major and minor grooves recognized by proteins."
+    },
+    {
+      "id": "rna",
+      "label": "RNA",
+      "file": "rna.svg",
+      "description": "Single-stranded RNA with ribose-phosphate backbone, exposed bases, stem-loop hairpin, and 5-prime/3-prime direction.",
+      "biologicalBasis": "RNA is usually single-stranded but forms intramolecular base-paired stems and loops that support recognition and catalysis."
+    },
+    {
+      "id": "protein",
+      "label": "Protein",
+      "file": "protein.svg",
+      "description": "Folded protein ribbon showing alpha helices, beta sheet, connecting loops, and a small ligand-binding pocket.",
+      "biologicalBasis": "Protein tertiary structure packs secondary-structure elements into a three-dimensional fold whose surface pockets support molecular recognition."
+    },
+    {
+      "id": "antibody",
+      "label": "Antibody",
+      "file": "antibody.svg",
+      "description": "Y-shaped IgG with paired heavy chains, paired light chains, hinge, Fc stem, and two antigen-binding tips.",
+      "biologicalBasis": "Immunoglobulin heavy and light variable domains form two antigen-binding sites, while the Fc region recruits immune effector mechanisms."
+    },
+    {
+      "id": "virus",
+      "label": "Virus",
+      "file": "virus.svg",
+      "description": "Enveloped icosahedral virus with genome-containing capsid, lipid envelope, and surface attachment spikes.",
+      "biologicalBasis": "Many animal viruses enclose a nucleocapsid within a host-derived lipid envelope bearing glycoprotein spikes used for receptor binding and entry."
+    },
+    {
+      "id": "bacterium",
+      "label": "Bacterium",
+      "file": "bacterium.svg",
+      "description": "Rod-shaped bacillus with layered envelope, cytoplasm, nucleoid, ribosomes, pili, and flagellum.",
+      "biologicalBasis": "Bacteria lack a membrane-bound nucleus; chromosomal DNA occupies a nucleoid, ribosomes fill the cytoplasm, and surface appendages mediate adhesion or motility."
+    },
+    {
+      "id": "umap",
+      "label": "UMAP",
+      "file": "umap.svg",
+      "description": "UMAP scatter plot with several irregularly shaped colored clusters, local density variation, and a small legend.",
+      "biologicalBasis": "UMAP projects high-dimensional neighborhood relationships into a low-dimensional embedding; separated point clouds conventionally denote cell states or clusters."
+    },
+    {
+      "id": "volcano",
+      "label": "Volcano",
+      "file": "volcano.svg",
+      "description": "Volcano plot with fold-change and significance axes, dashed thresholds, dense neutral center, and highlighted wings.",
+      "biologicalBasis": "Volcano plots combine effect size with statistical significance so strongly changed, well-supported features appear in the upper outer regions."
+    },
+    {
+      "id": "heatmap",
+      "label": "Heatmap",
+      "file": "heatmap.svg",
+      "description": "Expression heatmap with labeled red-blue matrix, row and column dendrograms, and a continuous color scale.",
+      "biologicalBasis": "Heatmaps encode values by color while hierarchical dendrograms expose similarity-based ordering of rows and columns."
+    },
+    {
+      "id": "barplot",
+      "label": "Bar plot",
+      "file": "barplot.svg",
+      "description": "Bar chart with labeled categories, baseline, ticks, varied heights, error bars, and legend swatches.",
+      "biologicalBasis": "Bar height encodes a category-level statistic; error bars conventionally show uncertainty or dispersion and require a defined summary measure."
+    },
+    {
+      "id": "boxplot",
+      "label": "Box plot",
+      "file": "boxplot.svg",
+      "description": "Grouped box-and-whisker plot with medians, interquartile boxes, whiskers, and outliers.",
+      "biologicalBasis": "A box plot displays median and interquartile range, with whisker and outlier rules summarizing distribution tails."
+    },
+    {
+      "id": "violin",
+      "label": "Violin",
+      "file": "violin.svg",
+      "description": "Grouped violin plot with mirrored densities, inner quartile boxes, medians, and sparse observations.",
+      "biologicalBasis": "Violin width represents estimated probability density while internal summaries anchor median and interquartile range."
+    },
+    {
+      "id": "scatter",
+      "label": "Scatter",
+      "file": "scatter.svg",
+      "description": "XY scatter plot with varied observations, regression line, confidence band, ticks, and axis labels.",
+      "biologicalBasis": "Scatter plots show paired measurements; a fitted trend and uncertainty band summarize association without replacing the raw observations."
+    },
+    {
+      "id": "lineplot",
+      "label": "Line plot",
+      "file": "lineplot.svg",
+      "description": "Two-series line plot with markers, axes, ticks, legend, and uncertainty ribbons.",
+      "biologicalBasis": "Line charts connect ordered observations such as time points; distinct markers and uncertainty bands clarify series and variability."
+    },
+    {
+      "id": "piechart",
+      "label": "Donut",
+      "file": "piechart.svg",
+      "description": "Donut chart with separated colored sectors, proportional arc lengths, labels, and legend.",
+      "biologicalBasis": "Sector angle encodes part-to-whole proportion, while a central opening preserves the ring structure used by a donut chart."
+    },
+    {
+      "id": "facs",
+      "label": "Flow cytometry",
+      "file": "facs.svg",
+      "description": "Flow-cytometry dot-density plot with logarithmic-looking axes, quadrant gates, clusters, and percentages.",
+      "biologicalBasis": "Flow plots display single-event fluorescence measurements; gates partition phenotypic populations and are interpreted with controls."
+    },
+    {
+      "id": "survival",
+      "label": "Survival",
+      "file": "survival.svg",
+      "description": "Kaplan–Meier plot with two stepped survival curves, censor ticks, axes, legend, and risk-table hint.",
+      "biologicalBasis": "Kaplan–Meier estimates change only at events; censor marks identify observations whose subsequent survival time is unknown."
+    },
+    {
+      "id": "network",
+      "label": "Network",
+      "file": "network.svg",
+      "description": "Biological interaction network with typed nodes, directed and inhibitory edges, modules, and legend.",
+      "biologicalBasis": "Network diagrams encode entities as nodes and relationships as edges; arrowheads or T-bars distinguish activation from inhibition."
+    },
+    {
+      "id": "dendrogram",
+      "label": "Dendrogram",
+      "file": "dendrogram.svg",
+      "description": "Hierarchical clustering dendrogram with unequal branch lengths, leaves, labels, and a cut threshold.",
+      "biologicalBasis": "A dendrogram records agglomerative merge order and height; a horizontal cut defines clusters at a chosen dissimilarity."
+    },
+    {
+      "id": "westernblot",
+      "label": "Western blot",
+      "file": "westernblot.svg",
+      "description": "Western blot membrane with sample lanes, molecular-weight ladder, realistic bands, lane labels, and loading control.",
+      "biologicalBasis": "Immunoblot band position estimates molecular mass and band intensity reflects target abundance only after appropriate loading normalization."
+    },
+    {
+      "id": "sequencer",
+      "label": "Sequencer",
+      "file": "sequencer.svg",
+      "description": "Benchtop DNA sequencer with sample bay, touchscreen run trace, status lights, vents, and reagent compartment.",
+      "biologicalBasis": "Benchtop sequencers combine fluidics, optical or electrical detection, temperature control, and run-control electronics."
+    },
+    {
+      "id": "microscope",
+      "label": "Microscope",
+      "file": "microscope.svg",
+      "description": "Compound light microscope with binocular head, rotating objectives, stage, condenser, focus knobs, illuminator, and base.",
+      "biologicalBasis": "Compound microscopes form magnified images using objective and eyepiece systems while the stage, condenser, and focus drive position the specimen and illumination."
+    },
+    {
+      "id": "flask",
+      "label": "Flask",
+      "file": "flask.svg",
+      "description": "Erlenmeyer flask with narrow neck, graduations, glass wall, liquid meniscus, and suspended culture material.",
+      "biologicalBasis": "The conical vessel supports mixing with reduced splashing; a curved meniscus and graduations communicate liquid volume."
+    },
+    {
+      "id": "testtube",
+      "label": "Test tube",
+      "file": "testtube.svg",
+      "description": "Glass test tube containing liquid, curved bottom, meniscus, wall thickness, and rack supports.",
+      "biologicalBasis": "A test tube is a cylindrical vessel with a rounded closed end; the liquid surface forms a meniscus against the wall."
+    },
+    {
+      "id": "petri",
+      "label": "Petri dish",
+      "file": "petri.svg",
+      "description": "Top-view petri dish with lid rim, agar surface, colonies of different sizes, and a streak path.",
+      "biologicalBasis": "Microbial colonies expand clonally on a nutrient-gel surface and differ in size, opacity, margin, and pigmentation."
+    },
+    {
+      "id": "dish",
+      "label": "Cell dish",
+      "file": "dish.svg",
+      "description": "Top-view cell-culture dish with lid rim, pink medium, adherent cell islands, and a liquid meniscus.",
+      "biologicalBasis": "Adherent cultured cells spread across the treated plastic surface beneath a shallow layer of buffered culture medium."
+    },
+    {
+      "id": "microplate",
+      "label": "96-well plate",
+      "file": "microplate.svg",
+      "description": "Perspective 96-well plate with 8×12 wells, rim, row/column cues, and differently filled assay wells.",
+      "biologicalBasis": "A standard 96-well plate arranges wells in eight rows and twelve columns for parallel liquid handling and optical assays."
+    },
+    {
+      "id": "pipette",
+      "label": "Pipette",
+      "file": "pipette.svg",
+      "description": "Single-channel micropipette with plunger, volume display, tip ejector, finger hook, shaft, and disposable tip.",
+      "biologicalBasis": "Air-displacement micropipettes use a piston to aspirate and dispense an adjustable microliter volume through a disposable tip."
+    },
+    {
+      "id": "pcrtube",
+      "label": "PCR tubes",
+      "file": "pcrtube.svg",
+      "description": "Eight-tube PCR strip with hinged caps, tapered reaction chambers, sample volumes, and connected top rail.",
+      "biologicalBasis": "Thin-walled PCR tubes promote rapid thermal transfer and are commonly supplied in connected strips with evaporation-limiting caps."
+    },
+    {
+      "id": "centrifuge",
+      "label": "Centrifuge",
+      "file": "centrifuge.svg",
+      "description": "Benchtop microcentrifuge with open lid, rotor, tube positions, hinge, control panel, and safety latch.",
+      "biologicalBasis": "A centrifuge rotor subjects samples to radial acceleration; balanced tube placement and a locking lid are essential operating features."
+    },
+    {
+      "id": "syringe",
+      "label": "Syringe",
+      "file": "syringe.svg",
+      "description": "Medical syringe with barrel, graduations, plunger, gasket, hub, needle, bevel, and contained fluid.",
+      "biologicalBasis": "Plunger displacement changes barrel volume, moving fluid through the hub and hollow beveled needle."
+    },
+    {
+      "id": "vial",
+      "label": "Vial",
+      "file": "vial.svg",
+      "description": "Capped laboratory vial with transparent wall, septum, label, liquid meniscus, and bottom curvature.",
+      "biologicalBasis": "Laboratory vials combine a chemically resistant container with a sealed cap or septum for storage and sampling."
+    },
+    {
+      "id": "incubator",
+      "label": "Incubator",
+      "file": "incubator.svg",
+      "description": "CO2 incubator with insulated cabinet, windowed inner door, shelves, sensor panel, water tray, and culture vessels.",
+      "biologicalBasis": "Cell-culture incubators regulate temperature, CO2, and humidity to stabilize medium pH and prevent evaporation."
+    },
+    {
+      "id": "freezer",
+      "label": "-80 freezer",
+      "file": "freezer.svg",
+      "description": "Upright ultra-low freezer with insulated outer door, inner compartments, latch, gasket, and −80 °C display.",
+      "biologicalBasis": "Ultra-low freezers use thick insulation, sealed compartments, and staged refrigeration to maintain approximately −80 °C storage."
+    },
+    {
+      "id": "scale",
+      "label": "Balance",
+      "file": "scale.svg",
+      "description": "Analytical balance with draft shield, weighing pan, leveling feet, display, and control keys.",
+      "biologicalBasis": "Analytical balances isolate the weighing pan from air currents and vibration to measure small mass changes reproducibly."
+    },
+    {
+      "id": "computer",
+      "label": "Workstation",
+      "file": "computer.svg",
+      "description": "Scientific workstation with monitor, plotted analysis, keyboard, mouse, tower, and data indicators.",
+      "biologicalBasis": "A workstation icon is grounded by recognizable input devices and a display showing scientific analysis rather than a generic screen glyph."
+    },
+    {
+      "id": "database",
+      "label": "Database",
+      "file": "database.svg",
+      "description": "Stacked cylindrical database with multiple disk layers, indexed records, input/output arrows, and status indicators.",
+      "biologicalBasis": "The stacked-cylinder convention represents persistent structured storage; layers and arrows communicate records and data transfer."
+    },
+    {
+      "id": "mouse",
+      "label": "Mouse model",
+      "file": "mouse.svg",
+      "description": "Laboratory mouse in side profile with detailed ear, eye, whiskers, paws, tail, and body contour.",
+      "biologicalBasis": "The laboratory mouse has a compact rodent body plan with prominent pinnae, vibrissae, digit-bearing paws, and a long tapering tail."
+    },
+    {
+      "id": "target",
+      "label": "Target",
+      "file": "target.svg",
+      "description": "Folded protein surface with a concave binding pocket, contacting small molecule, and interaction markers.",
+      "biologicalBasis": "Ligand binding depends on three-dimensional shape and complementary noncovalent contacts within a protein pocket."
+    },
+    {
+      "id": "pill",
+      "label": "Drug",
+      "file": "pill.svg",
+      "description": "Two-piece capsule with translucent shell halves, seam, internal granules, and subtle printed dose mark.",
+      "biologicalBasis": "Hard capsules consist of telescoping cap and body components that enclose powder, pellets, or granules for oral delivery."
+    }
+  ]
+}

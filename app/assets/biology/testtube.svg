@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="title desc">
+  <title id="title">Test tube</title>
+  <desc id="desc">Glass test tube containing liquid, curved bottom, meniscus, wall thickness, and rack supports. Biological basis: A test tube is a cylindrical vessel with a rounded closed end; the liquid surface forms a meniscus against the wall.</desc>
+  <metadata>{"id":"testtube","label":"Test tube","description":"Glass test tube containing liquid, curved bottom, meniscus, wall thickness, and rack supports.","biologicalBasis":"A test tube is a cylindrical vessel with a rounded closed end; the liquid surface forms a meniscus against the wall."}</metadata>
+  <path d="M37 15h26v56a13 13 0 01-26 0z" fill="#DFF1F5" stroke="#5E8E9F" stroke-width="2.5"/><path d="M40 53h20v18a10 10 0 01-20 0z" fill="#E68B83"/><path d="M20 18h60M26 18v70M74 18v70M18 88h64" stroke="#53616B" stroke-width="3" stroke-linecap="round"/><path d="M29 62h7M29 69h7M64 62h7M64 69h7" stroke="#5E8E9F" stroke-width="1"/>
+</svg>

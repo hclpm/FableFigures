@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="title desc">
+  <title id="title">Microscope</title>
+  <desc id="desc">Compound light microscope with binocular head, rotating objectives, stage, condenser, focus knobs, illuminator, and base. Biological basis: Compound microscopes form magnified images using objective and eyepiece systems while the stage, condenser, and focus drive position the specimen and illumination.</desc>
+  <metadata>{"id":"microscope","label":"Microscope","description":"Compound light microscope with binocular head, rotating objectives, stage, condenser, focus knobs, illuminator, and base.","biologicalBasis":"Compound microscopes form magnified images using objective and eyepiece systems while the stage, condenser, and focus drive position the specimen and illumination."}</metadata>
+  <path d="M39 14h18v14H39zM47 28l12 25M58 52c15 2 21 11 17 23M30 79h51" fill="none" stroke="#53616B" stroke-width="7" stroke-linecap="round"/><path d="M26 58h42M39 58v12" stroke="#8AA0AA" stroke-width="5"/><circle cx="57" cy="54" r="5" fill="#E7B25D"/><rect x="31" y="75" width="50" height="10" rx="5" fill="#9EB1B8" stroke="#53616B" stroke-width="2"/><circle cx="68" cy="62" r="5" fill="none" stroke="#53616B" stroke-width="2"/><circle cx="68" cy="62" r="2" fill="#53616B"/>
+</svg>

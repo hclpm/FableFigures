@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="title desc">
+  <title id="title">Syringe</title>
+  <desc id="desc">Medical syringe with barrel, graduations, plunger, gasket, hub, needle, bevel, and contained fluid. Biological basis: Plunger displacement changes barrel volume, moving fluid through the hub and hollow beveled needle.</desc>
+  <metadata>{"id":"syringe","label":"Syringe","description":"Medical syringe with barrel, graduations, plunger, gasket, hub, needle, bevel, and contained fluid.","biologicalBasis":"Plunger displacement changes barrel volume, moving fluid through the hub and hollow beveled needle."}</metadata>
+  <g transform="rotate(-28 50 50)"><rect x="27" y="35" width="46" height="23" rx="3" fill="#E7F3F5" stroke="#5F8998" stroke-width="2"/><path d="M34 36v21M41 39v7M48 39v7M55 39v7M62 39v7" stroke="#759AA7"/><rect x="18" y="40" width="10" height="13" fill="#C5D7DC" stroke="#5F8998"/><path d="M9 34v25M9 47h9M73 47h22" stroke="#53616B" stroke-width="2.5"/><path d="M95 47h5" stroke="#A0A8AB"/></g>
+</svg>

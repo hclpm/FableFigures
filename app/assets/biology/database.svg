@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="title desc">
+  <title id="title">Database</title>
+  <desc id="desc">Stacked cylindrical database with multiple disk layers, indexed records, input/output arrows, and status indicators. Biological basis: The stacked-cylinder convention represents persistent structured storage; layers and arrows communicate records and data transfer.</desc>
+  <metadata>{"id":"database","label":"Database","description":"Stacked cylindrical database with multiple disk layers, indexed records, input/output arrows, and status indicators.","biologicalBasis":"The stacked-cylinder convention represents persistent structured storage; layers and arrows communicate records and data transfer."}</metadata>
+  <path d="M24 23q26-15 52 0v52q-26 15-52 0z" fill="#78A9C5" stroke="#4F7790" stroke-width="2.4"/><ellipse cx="50" cy="23" rx="26" ry="11" fill="#A8CBDD" stroke="#4F7790" stroke-width="2"/><path d="M24 40q26 15 52 0M24 57q26 15 52 0" fill="none" stroke="#DDEEF5" stroke-width="2"/>
+</svg>

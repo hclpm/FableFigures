@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="title desc">
+  <title id="title">Line plot</title>
+  <desc id="desc">Two-series line plot with markers, axes, ticks, legend, and uncertainty ribbons. Biological basis: Line charts connect ordered observations such as time points; distinct markers and uncertainty bands clarify series and variability.</desc>
+  <metadata>{"id":"lineplot","label":"Line plot","description":"Two-series line plot with markers, axes, ticks, legend, and uncertainty ribbons.","biologicalBasis":"Line charts connect ordered observations such as time points; distinct markers and uncertainty bands clarify series and variability."}</metadata>
+  <path d="M17 14v68h70" fill="none" stroke="#59636C" stroke-width="2" stroke-linecap="round"/><path d="M22 69l13-15 12 6 14-23 18-12" fill="none" stroke="#4D91BE" stroke-width="3"/><path d="M22 61l15-9 13-14 16 8 13-19" fill="none" stroke="#DD746D" stroke-width="3"/><path d="M27 80v3M39 80v3M51 80v3M63 80v3M75 80v3M14 68h3M14 54h3M14 40h3M14 26h3" stroke="#59636C" stroke-width="1"/><text x="83" y="89" font-size="5" font-family="sans-serif" fill="#59636C">x</text><text x="7" y="17" font-size="5" font-family="sans-serif" fill="#59636C">y</text>
+</svg>

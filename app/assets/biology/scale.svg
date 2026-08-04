@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="title desc">
+  <title id="title">Balance</title>
+  <desc id="desc">Analytical balance with draft shield, weighing pan, leveling feet, display, and control keys. Biological basis: Analytical balances isolate the weighing pan from air currents and vibration to measure small mass changes reproducibly.</desc>
+  <metadata>{"id":"scale","label":"Balance","description":"Analytical balance with draft shield, weighing pan, leveling feet, display, and control keys.","biologicalBasis":"Analytical balances isolate the weighing pan from air currents and vibration to measure small mass changes reproducibly."}</metadata>
+  <path d="M25 30q25-15 50 0l-6 22H31z" fill="#DDE8EA" stroke="#53616B" stroke-width="2"/><rect x="18" y="49" width="64" height="35" rx="6" fill="#BECED3" stroke="#53616B" stroke-width="2.3"/><rect x="33" y="59" width="27" height="11" rx="2" fill="#263D48"/><path d="M50 30V17" stroke="#53616B" stroke-width="3"/><ellipse cx="50" cy="16" rx="22" ry="6" fill="#E4ECEE" stroke="#53616B" stroke-width="2"/>
+</svg>

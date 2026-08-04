@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="title desc">
+  <title id="title">Vial</title>
+  <desc id="desc">Capped laboratory vial with transparent wall, septum, label, liquid meniscus, and bottom curvature. Biological basis: Laboratory vials combine a chemically resistant container with a sealed cap or septum for storage and sampling.</desc>
+  <metadata>{"id":"vial","label":"Vial","description":"Capped laboratory vial with transparent wall, septum, label, liquid meniscus, and bottom curvature.","biologicalBasis":"Laboratory vials combine a chemically resistant container with a sealed cap or septum for storage and sampling."}</metadata>
+  <rect x="30" y="25" width="40" height="59" rx="8" fill="#DFF1F5" stroke="#5E8E9F" stroke-width="2.3"/><rect x="27" y="15" width="46" height="18" rx="4" fill="#78A9C5" stroke="#4F7790" stroke-width="2"/><path d="M33 57h34v23H33z" fill="#E7B25D" fill-opacity=".75"/><rect x="39" y="39" width="22" height="12" rx="2" fill="#fff"/><path d="M29 62h7M29 69h7M64 62h7M64 69h7" stroke="#5E8E9F" stroke-width="1"/>
+</svg>

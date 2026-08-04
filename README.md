@@ -93,6 +93,8 @@ app/
   index.html   layout: home screen, editor, dialogs
   styles.css   styling (light/dark)
   assets.js    asset catalog + translations (exposed as window.CAM)
+  biology-assets.js  generated Biology icon overrides
+  assets/biology/    standalone redesigned Biology SVG source files
   app.js       the engine: state, rendering, connectors, presets, interaction
   app2.js      the UI: library, properties, export, projects, settings
 ```
@@ -103,6 +105,11 @@ there's nothing to compile. If you're extending it: shapes live in `shapePath()`
 the `I18N` map. Projects are stored in `localStorage` (or a folder you pick in Settings).
 Internal identifiers still use the project's old codename, `camrender`, for storage
 compatibility; the app itself is Fable Figures.
+
+The 86 non-preset Biology icons are maintained as individual SVG files in
+`app/assets/biology/`. Run `node scripts/rebuild-biology-assets.js` after changing their
+generator to refresh both those files and the synchronous `app/biology-assets.js`
+registry used by the editor. The pre-redesign assets are preserved under `backups/`.
 
 ## Data and privacy
 

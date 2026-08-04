@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="title desc">
+  <title id="title">Petri dish</title>
+  <desc id="desc">Top-view petri dish with lid rim, agar surface, colonies of different sizes, and a streak path. Biological basis: Microbial colonies expand clonally on a nutrient-gel surface and differ in size, opacity, margin, and pigmentation.</desc>
+  <metadata>{"id":"petri","label":"Petri dish","description":"Top-view petri dish with lid rim, agar surface, colonies of different sizes, and a streak path.","biologicalBasis":"Microbial colonies expand clonally on a nutrient-gel surface and differ in size, opacity, margin, and pigmentation."}</metadata>
+  <ellipse cx="50" cy="52" rx="41" ry="29" fill="#E2F0E1" fill-opacity=".75" stroke="#6F9EAA" stroke-width="2.5"/><ellipse cx="50" cy="45" rx="41" ry="27" fill="#fff" fill-opacity=".25" stroke="#8AB2BF" stroke-width="1.5"/><circle cx="28" cy="43" r="3" fill="#E7B25D" /><circle cx="43" cy="55" r="3" fill="#E7B25D" /><circle cx="59" cy="37" r="3" fill="#E7B25D" /><circle cx="69" cy="54" r="3" fill="#E7B25D" /><circle cx="52" cy="47" r="3" fill="#E7B25D" /><path d="M25 58q13-22 43-14" fill="none" stroke="#D4A447" stroke-width="1" stroke-dasharray="2 2"/>
+</svg>

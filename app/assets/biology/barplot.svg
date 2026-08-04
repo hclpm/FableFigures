@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="title desc">
+  <title id="title">Bar plot</title>
+  <desc id="desc">Bar chart with labeled categories, baseline, ticks, varied heights, error bars, and legend swatches. Biological basis: Bar height encodes a category-level statistic; error bars conventionally show uncertainty or dispersion and require a defined summary measure.</desc>
+  <metadata>{"id":"barplot","label":"Bar plot","description":"Bar chart with labeled categories, baseline, ticks, varied heights, error bars, and legend swatches.","biologicalBasis":"Bar height encodes a category-level statistic; error bars conventionally show uncertainty or dispersion and require a defined summary measure."}</metadata>
+  <path d="M17 14v68h70" fill="none" stroke="#59636C" stroke-width="2" stroke-linecap="round"/><rect x="25" y="55" width="10" height="13" rx="2" fill="#78A8CC"/><rect x="42" y="35" width="10" height="33" rx="2" fill="#E58A7F"/><rect x="59" y="25" width="10" height="43" rx="2" fill="#E6B35E"/><rect x="76" y="45" width="10" height="23" rx="2" fill="#82AF79"/><path d="M27 80v3M39 80v3M51 80v3M63 80v3M75 80v3M14 68h3M14 54h3M14 40h3M14 26h3" stroke="#59636C" stroke-width="1"/><text x="83" y="89" font-size="5" font-family="sans-serif" fill="#59636C">x</text><text x="7" y="17" font-size="5" font-family="sans-serif" fill="#59636C">y</text>
+</svg>

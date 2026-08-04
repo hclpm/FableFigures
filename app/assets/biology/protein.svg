@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="title desc">
+  <title id="title">Protein</title>
+  <desc id="desc">Folded protein ribbon showing alpha helices, beta sheet, connecting loops, and a small ligand-binding pocket. Biological basis: Protein tertiary structure packs secondary-structure elements into a three-dimensional fold whose surface pockets support molecular recognition.</desc>
+  <metadata>{"id":"protein","label":"Protein","description":"Folded protein ribbon showing alpha helices, beta sheet, connecting loops, and a small ligand-binding pocket.","biologicalBasis":"Protein tertiary structure packs secondary-structure elements into a three-dimensional fold whose surface pockets support molecular recognition."}</metadata>
+  <path d="M18 66c4-24 21-41 38-33 10 5-3 17-11 10-8-7 5-22 19-16 18 8 15 33 4 45-12 13-31 6-23-7 6-9 19-1 13 8" fill="none" stroke="#8E68B0" stroke-width="7" stroke-linecap="round"/><path d="M24 28l12-7 11 7-11 7zM64 56l14-6-2 13-13 5z" fill="#E4A15E" stroke="#B66C35" stroke-width="1.5"/><path d="M24 77q22 11 47-1" fill="none" stroke="#5F4779" stroke-width="1.2"/><circle cx="42" cy="49" r="2" fill="#E2B25E" /><circle cx="53" cy="43" r="2" fill="#E2B25E" /><circle cx="60" cy="54" r="2" fill="#E2B25E" />
+</svg>

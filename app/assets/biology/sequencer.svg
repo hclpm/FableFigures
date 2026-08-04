@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="title desc">
+  <title id="title">Sequencer</title>
+  <desc id="desc">Benchtop DNA sequencer with sample bay, touchscreen run trace, status lights, vents, and reagent compartment. Biological basis: Benchtop sequencers combine fluidics, optical or electrical detection, temperature control, and run-control electronics.</desc>
+  <metadata>{"id":"sequencer","label":"Sequencer","description":"Benchtop DNA sequencer with sample bay, touchscreen run trace, status lights, vents, and reagent compartment.","biologicalBasis":"Benchtop sequencers combine fluidics, optical or electrical detection, temperature control, and run-control electronics."}</metadata>
+  <rect x="15" y="22" width="70" height="58" rx="8" fill="#D9E2E5" stroke="#53616B" stroke-width="2.2"/><rect x="25" y="31" width="31" height="21" rx="3" fill="#243D4B"/><path d="M29 45l7-6 6 4 9-8" fill="none" stroke="#70D1D2" stroke-width="2"/><rect x="63" y="32" width="12" height="7" rx="2" fill="#E68B83"/><circle cx="69" cy="52" r="4" fill="#79A56A"/><rect x="25" y="61" width="50" height="10" rx="3" fill="#B8C7CC"/>
+</svg>

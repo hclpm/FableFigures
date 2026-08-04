@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="title desc">
+  <title id="title">Drug</title>
+  <desc id="desc">Two-piece capsule with translucent shell halves, seam, internal granules, and subtle printed dose mark. Biological basis: Hard capsules consist of telescoping cap and body components that enclose powder, pellets, or granules for oral delivery.</desc>
+  <metadata>{"id":"pill","label":"Drug","description":"Two-piece capsule with translucent shell halves, seam, internal granules, and subtle printed dose mark.","biologicalBasis":"Hard capsules consist of telescoping cap and body components that enclose powder, pellets, or granules for oral delivery."}</metadata>
+  <g transform="rotate(25 50 50)"><rect x="17" y="34" width="66" height="32" rx="16" fill="#E68B83" stroke="#AD5654" stroke-width="2.4"/><path d="M50 35v30" stroke="#7D6262" stroke-width="1.4"/><path d="M50 36h17q14 0 14 14t-14 14H50z" fill="#78A9C5"/><circle cx="30" cy="45" r="2" fill="#E8C16E" /><circle cx="38" cy="54" r="2" fill="#E8C16E" /><circle cx="61" cy="46" r="2" fill="#E8C16E" /><circle cx="69" cy="55" r="2" fill="#E8C16E" /></g>
+</svg>

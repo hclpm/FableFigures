@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="title desc">
+  <title id="title">Adipocyte</title>
+  <desc id="desc">Unilocular adipocyte with one dominant lipid droplet, extremely thin cytoplasmic rim, and peripheral flattened nucleus. Biological basis: White adipocytes store neutral lipid in one large droplet that displaces the nucleus and organelles to the cell periphery.</desc>
+  <metadata>{"id":"adipocyte","label":"Adipocyte","description":"Unilocular adipocyte with one dominant lipid droplet, extremely thin cytoplasmic rim, and peripheral flattened nucleus.","biologicalBasis":"White adipocytes store neutral lipid in one large droplet that displaces the nucleus and organelles to the cell periphery."}</metadata>
+  <defs><linearGradient id="bodyadipocyte" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE5A6"/><stop offset="1" stop-color="#E8B95E"/></linearGradient></defs><circle cx="50" cy="50" r="40" fill="url(#bodyadipocyte)" stroke="#C69338" stroke-width="2.3"/><circle cx="49" cy="49" r="31" fill="#FFF1BE" stroke="#D8B059" stroke-width="1.6"/><ellipse cx="73" cy="70" rx="7" ry="5" fill="#6A566D"/><path d="M73 65q8-4 11-12M72 75q7 2 10 7" fill="none" stroke="#B98435" stroke-width="1.2"/>
+</svg>

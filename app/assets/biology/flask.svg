@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="title desc">
+  <title id="title">Flask</title>
+  <desc id="desc">Erlenmeyer flask with narrow neck, graduations, glass wall, liquid meniscus, and suspended culture material. Biological basis: The conical vessel supports mixing with reduced splashing; a curved meniscus and graduations communicate liquid volume.</desc>
+  <metadata>{"id":"flask","label":"Flask","description":"Erlenmeyer flask with narrow neck, graduations, glass wall, liquid meniscus, and suspended culture material.","biologicalBasis":"The conical vessel supports mixing with reduced splashing; a curved meniscus and graduations communicate liquid volume."}</metadata>
+  <path d="M40 14h20v25l25 37q4 8-6 8H21q-10 0-6-8l25-37z" fill="#DFF1F5" fill-opacity=".72" stroke="#5E8E9F" stroke-width="2.5"/><path d="M22 67q28-9 56 0l8 13H14z" fill="#E68B83" fill-opacity=".75"/><path d="M42 24h16" stroke="#fff" stroke-width="3" opacity=".8"/><path d="M29 62h7M29 69h7M64 62h7M64 69h7" stroke="#5E8E9F" stroke-width="1"/>
+</svg>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="title desc">
+  <title id="title">Dendrogram</title>
+  <desc id="desc">Hierarchical clustering dendrogram with unequal branch lengths, leaves, labels, and a cut threshold. Biological basis: A dendrogram records agglomerative merge order and height; a horizontal cut defines clusters at a chosen dissimilarity.</desc>
+  <metadata>{"id":"dendrogram","label":"Dendrogram","description":"Hierarchical clustering dendrogram with unequal branch lengths, leaves, labels, and a cut threshold.","biologicalBasis":"A dendrogram records agglomerative merge order and height; a horizontal cut defines clusters at a chosen dissimilarity."}</metadata>
+  <path d="M18 80V65h18V48h18V29h28M36 65h16V53M54 48h15V38M18 80h12M52 65h12M69 48h14M54 29h10M82 29h7" fill="none" stroke="#62737E" stroke-width="2.5" stroke-linejoin="round"/><path d="M27 80v3M39 80v3M51 80v3M63 80v3M75 80v3M14 68h3M14 54h3M14 40h3M14 26h3" stroke="#59636C" stroke-width="1"/><text x="83" y="89" font-size="5" font-family="sans-serif" fill="#59636C">x</text><text x="7" y="17" font-size="5" font-family="sans-serif" fill="#59636C">y</text>
+</svg>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="title desc">
+  <title id="title">Incubator</title>
+  <desc id="desc">CO2 incubator with insulated cabinet, windowed inner door, shelves, sensor panel, water tray, and culture vessels. Biological basis: Cell-culture incubators regulate temperature, CO2, and humidity to stabilize medium pH and prevent evaporation.</desc>
+  <metadata>{"id":"incubator","label":"Incubator","description":"CO2 incubator with insulated cabinet, windowed inner door, shelves, sensor panel, water tray, and culture vessels.","biologicalBasis":"Cell-culture incubators regulate temperature, CO2, and humidity to stabilize medium pH and prevent evaporation."}</metadata>
+  <rect x="23" y="8" width="54" height="84" rx="5" fill="#D8E1E4" stroke="#53616B" stroke-width="2.5"/><rect x="30" y="16" width="40" height="55" rx="3" fill="#829AA3" stroke="#647983" stroke-width="1.8"/><path d="M34 29h32" stroke="#D8E8EA" stroke-width="2"/><path d="M34 43h32" stroke="#D8E8EA" stroke-width="2"/><path d="M34 57h32" stroke="#D8E8EA" stroke-width="2"/><circle cx="68" cy="83" r="3" fill="#79A56A"/>
+</svg>

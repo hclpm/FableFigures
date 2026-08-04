@@ -1,0 +1,274 @@
+#!/usr/bin/env node
+"use strict";
+
+/*
+ * Rebuilds the non-preset Biology library as standalone SVG files and as the
+ * synchronous browser registry consumed by Fable Figures.  The drawings use
+ * a shared matte scientific-illustration language: warm pastel gradients,
+ * restrained outlines, small highlight planes, and biologically identifying
+ * internal detail.  No raster data is embedded.
+ */
+const fs = require("fs");
+const path = require("path");
+const vm = require("vm");
+const {metadata,references} = require("./biology-metadata");
+
+const root = path.resolve(__dirname, "..");
+const assetsFile = path.join(root, "app", "assets.js");
+const outDir = path.join(root, "app", "assets", "biology");
+const backupDir = path.join(root, "backups", "2026-08-04-before-biology-redesign");
+const legacyDir = path.join(backupDir, "biology-svg");
+
+const esc = s => String(s).replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const circles = (pts, fill, r=2, extra="") => pts.map(([x,y]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${fill}" ${extra}/>`).join("");
+const lines = (pts, stroke, width=1.4, extra="") => pts.map(d => `<path d="${d}" fill="none" stroke="${stroke}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round" ${extra}/>`).join("");
+const defs = (a,b) => `<defs><linearGradient id="body__ID__" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient></defs>`;
+const shine = ""; // Deliberately matte: no specular highlight or reflection strokes.
+
+function nucleus(kind, fill="#66537D", stroke="#4D3A68", x=53, y=52) {
+  const a=`fill="${fill}" stroke="${stroke}" stroke-width="1.7"`;
+  if(kind==="none") return "";
+  if(kind==="indented") return `<path d="M38 39c10-10 30-7 34 5 3 9-3 20-14 23-10 3-22-2-24-12 8 2 13-5 4-16z" ${a}/>`;
+  if(kind==="kidney") return `<path d="M34 35c12-9 32-5 37 8 4 11-4 24-16 27-11 3-24-3-27-13-2-7 1-14 6-18 5 8 16 6 18-2 1-5-9-7-18-2z" ${a}/>`;
+  if(kind==="bilobed") return `<path d="M29 49c0-11 9-18 19-16 6 1 9 6 10 11 3-7 9-10 16-8 10 3 14 15 8 23-5 8-17 10-24 3-7 8-20 5-25-3-3-3-4-7-4-10z" ${a}/><path d="M54 48c3 2 5 4 7 7" fill="none" stroke="${stroke}" stroke-width="3"/>`;
+  if(kind==="lobed") return `<path d="M25 47c-2-10 9-18 18-13 3-9 17-11 22-3 10-3 19 7 15 16 8 7 2 20-8 20-3 9-18 10-23 2-9 5-20-3-17-13-8-1-12-9-7-16z" ${a}/><path d="M42 35c-2 8 3 13 9 15M64 32c-5 7-3 14 4 18M34 60c7-4 13-2 17 7M61 52c-3 7 0 12 8 15" fill="none" stroke="${stroke}" stroke-width="2" opacity=".75"/>`;
+  if(kind==="clock") return `<ellipse cx="62" cy="51" rx="18" ry="22" ${a}/>`+circles([[54,42],[64,39],[70,46],[55,53],[67,57],[59,64]],"#D8C4EA",1.7);
+  if(kind==="huge") return `<path d="M25 34c8-13 29-15 39-5 12-4 23 8 18 19 9 9 1 24-11 23-7 9-22 6-25-3-12 4-23-7-18-18-8-3-9-11-3-16z" ${a}/>`;
+  return `<ellipse cx="${x}" cy="${y}" rx="20" ry="21" ${a}/><circle cx="${x+5}" cy="${y-3}" r="2.2" fill="${stroke}" opacity=".72"/>`;
+}
+
+function roundCell(o={}) {
+  const {a="#B9E1DC",b="#5DA9A2",edge="#377D79",n="#58667B",ns="#3E4A60",nk="round",feature="",granule="#704F88"}=o;
+  let outer=`<circle cx="50" cy="50" r="38" fill="url(#body__ID__)" stroke="${edge}" stroke-width="2.4"/>${shine}`;
+  if(feature==="ruffles") outer=`<path d="M19 31c5-3 6-10 13-9 4-7 12-10 18-6 7-5 16-2 19 4 8-1 14 5 14 12 7 4 8 12 4 18 4 7 0 15-7 18-2 8-11 11-17 8-6 6-15 5-20 0-8 4-16-2-17-10-8-2-10-11-5-17-5-5-4-14 1-17z" fill="url(#body__ID__)" stroke="${edge}" stroke-width="2.4"/>${shine}`;
+  let f="";
+  if(feature==="fine") f=circles([[25,38],[31,61],[40,26],[47,72],[60,28],[71,44],[73,62],[22,51],[56,67]],granule,1.25,"opacity=\".65\"");
+  if(feature==="coarse") f=circles([[25,34],[34,66],[42,27],[50,75],[67,29],[76,49],[68,68],[24,54],[56,61]],granule,2.3);
+  if(feature==="dense") f=circles([[22,31],[31,23],[42,29],[55,22],[68,28],[77,38],[24,47],[37,43],[50,50],[64,44],[76,55],[28,63],[41,69],[57,65],[70,72]],granule,3);
+  if(feature==="nk") f=circles([[27,55],[34,66],[43,70],[27,42]],granule,2.4);
+  if(feature==="spikes") f=[0,30,60,90,120,150,180,210,240,270,300,330].map(v=>{const q=v*Math.PI/180;return `<path d="M${50+37*Math.cos(q)} ${50+37*Math.sin(q)}l${5*Math.cos(q)} ${5*Math.sin(q)}" stroke="${edge}" stroke-width="1.7" stroke-linecap="round"/><circle cx="${50+43*Math.cos(q)}" cy="${50+43*Math.sin(q)}" r="1.4" fill="${edge}"/>`;}).join("");
+  if(feature==="y") f=[[23,36],[74,35],[25,66],[72,68]].map(([x,y])=>`<path d="M${x} ${y}l4 5m-4-5l-1-5m1 5l5-3" stroke="#356E57" stroke-width="1.7" fill="none" stroke-linecap="round"/>`).join("");
+  if(feature==="halo") f=`<ellipse cx="43" cy="52" rx="9" ry="13" fill="#EAF8FA" opacity=".85"/>`;
+  if(feature==="memory") f=`<path d="M24 29c7-7 15-11 24-12" stroke="#2E6197" stroke-width="1.6" stroke-dasharray="2 2"/><circle cx="76" cy="27" r="5" fill="#F2C75C" stroke="#B88C26" stroke-width="1.4"/>`;
+  if(feature==="obscure") f=circles([[25,30],[37,23],[50,28],[63,22],[75,34],[27,47],[41,42],[57,45],[72,51],[31,64],[48,59],[63,68],[75,64],[47,76]],"#463467",4.3);
+  return defs(a,b)+outer+nucleus(nk,n,ns)+(feature==="halo"?f:"")+f;
+}
+
+function macrophage(){return defs("#D8A9D5","#8C5A9C")+`<path d="M13 43c8-5 4-14 14-14 5-9 14-7 19-12 9 7 15 0 23 7 2 7 12 6 14 14 8 5 3 14 5 20-7 4-4 14-14 16-7-4-11 6-20 1-5 7-14 2-17-4-9 3-15-5-15-13-7-5-5-14 0-18z" fill="url(#body__ID__)" stroke="#704477" stroke-width="2.4"/>${nucleus("kidney","#65466F","#49304F",54,53)}${circles([[29,43],[37,66],[67,35],[72,61]],"#EFCB78",4)}${circles([[30,43],[67,35]],"#FFF0B7",1.5)}${shine}`;}
+function dendriticCell(){return defs("#F6B26F","#E1884E")+`<g fill="none" stroke="#B96535" stroke-linecap="round" stroke-linejoin="round"><path d="M40 39Q27 25 19 11M30 31L14 29M25 24L27 9M60 38Q73 24 82 10M70 30L89 27M76 20L73 7M38 59Q24 68 14 86M29 66L10 64M23 74L28 91M61 59Q76 69 88 86M72 68L91 65M79 75L75 92" stroke-width="7"/><path d="M19 11l-7-5m7 5 2-8M14 29l-8-4m8 4-7 4M82 10l7-6m-7 6-1-8M89 27l7-5m-7 5 7 5M14 86l-8 5m8-5-1 9M10 64l-7-5m7 5-8 3M88 86l7 6m-7-6 1 10M91 65l7-4m-7 4 7 4" stroke-width="2.5"/></g><path d="M31 43c3-12 15-18 27-13 12 4 17 18 10 29-7 12-25 16-35 6-6-6-7-15-2-22z" fill="url(#body__ID__)" stroke="#A9553A" stroke-width="2"/><ellipse cx="50" cy="49" rx="12" ry="14" fill="#9C5E56" stroke="#70413E" stroke-width="1.5"/><path d="M42 47q8-7 16 0M42 53q8 7 16 0" fill="none" stroke="#70413E" stroke-width="1"/>`+circles([[35,41],[64,40],[37,62],[62,61]],"#D4784F",2);}
+function megakaryocyte(){return defs("#E6C4E8","#9B6EAF")+`<circle cx="47" cy="52" r="41" fill="url(#body__ID__)" stroke="#765285" stroke-width="2.5"/>${nucleus("huge","#644477","#493151")}<path d="M75 73c6 5 5 13 12 14M69 79c1 8 8 7 12 10" fill="none" stroke="#765285" stroke-width="2"/>${circles([[89,88],[84,92],[94,91],[88,96]],"#8A6AA2",3)}${shine}`;}
+function platelets(){return `<g fill="#8B6BA6" stroke="#5D4674" stroke-width="1.5">${[[24,36,7,5,-20],[43,25,6,5,10],[61,39,8,5,25],[75,29,5,4,-5],[32,59,8,5,15],[55,62,6,5,-20],[73,67,7,4,20],[45,78,5,4,0]].map(([x,y,rx,ry,r])=>`<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" transform="rotate(${r} ${x} ${y})"/>`).join("")}</g>`+circles([[22,34],[59,37],[31,57],[72,65]],"#D9C8EA",1.4);}
+
+const icons={};
+const roundSpecs={
+ pluripotent:{a:"#BFE9E2",b:"#5DB7AE",edge:"#33847E",n:"#527985",ns:"#335A66"},
+ bloodstem:{a:"#D8C3E8",b:"#9370B1",edge:"#6E4E8B",n:"#684C83",ns:"#49335F",feature:"ruffles"},
+ lymphoidprog:{a:"#D7ECFA",b:"#83BBDD",edge:"#4F8EB8",n:"#587A9D",ns:"#3F5E7C"},
+ myeloidprog:{a:"#FFD8A5",b:"#EBA063",edge:"#B86E38",n:"#8D5A54",ns:"#68413D",feature:"fine",granule:"#C46D4D"},
+ tprecursor:{a:"#C9E5FA",b:"#6DA9D8",edge:"#3D7FAD",n:"#456F9C",ns:"#2E5278"},
+ bprecursor:{a:"#D8EBCB",b:"#83B978",edge:"#4D8450",n:"#55745D",ns:"#3B5543"},
+ nkcell:{a:"#D7C2E9",b:"#8C68AD",edge:"#664984",n:"#59446E",ns:"#3F3053",nk:"indented",feature:"nk",granule:"#4B315F"},
+ tcell:{a:"#C9E4F7",b:"#6BA7D5",edge:"#3C7EAE",n:"#496D96",ns:"#304F72",feature:"spikes"},
+ bcell:{a:"#D5EBCF",b:"#78B97A",edge:"#458149",n:"#52705B",ns:"#354D3E",feature:"y"},
+ plasma:{a:"#C8E5F2",b:"#6AA7C5",edge:"#3F7897",n:"#70567D",ns:"#4D3B59",nk:"clock",feature:"halo"},
+ memory:{a:"#BCD9F0",b:"#477EBC",edge:"#2E6197",n:"#3E5E87",ns:"#293F62",feature:"memory"},
+ immune:{a:"#DED3E7",b:"#9A83AA",edge:"#725E82",n:"#62506F",ns:"#44374E",nk:"lobed"},
+ neutrophil:{a:"#F7DDE5",b:"#DDA3B7",edge:"#B57089",n:"#765A83",ns:"#523D61",nk:"lobed",feature:"fine",granule:"#C46F88"},
+ eosinophil:{a:"#FFE2D2",b:"#EFA58A",edge:"#BD7159",n:"#72516F",ns:"#50384D",nk:"bilobed",feature:"coarse",granule:"#D85F3E"},
+ basophil:{a:"#D5D3EA",b:"#8782B3",edge:"#5C568A",n:"#554C75",ns:"#3C3557",feature:"obscure"},
+ monocyte:{a:"#D7E3E9",b:"#8FA8B8",edge:"#607B8C",n:"#58687B",ns:"#3D4B5B",nk:"kidney"},
+ erythrocyte:{a:"#F7A49B",b:"#CF544F",edge:"#A83B39",n:"#E77B75",ns:"#C44E4A",nk:"none"},
+ mast:{a:"#DFC8E8",b:"#A37AB7",edge:"#74538A",n:"#604A73",ns:"#42324F",feature:"dense",granule:"#71457F"}
+};
+Object.entries(roundSpecs).forEach(([k,v])=>icons[k]=roundCell(v));
+icons.erythrocyte=defs("#F58E86","#D4514D")+`<ellipse cx="50" cy="50" rx="39" ry="31" fill="url(#body__ID__)" stroke="#A83B39" stroke-width="2.5"/><ellipse cx="50" cy="50" rx="21" ry="13" fill="#ED7D76" stroke="#BD4946" stroke-width="1.5"/><ellipse cx="50" cy="50" rx="12" ry="6" fill="#F3A29B"/>`;
+icons.macrophage=macrophage(); icons.dendritic=dendriticCell(); icons.megakaryocyte=megakaryocyte(); icons.platelets=platelets();
+
+function epithelial(kind){
+ const palette={enterocyte:["#F8C8A9","#E48D6F"],goblet:["#D8EAF2","#80B6C9"],paneth:["#FFD1AE","#E78A62"],endocrine:["#F2C5D5","#C27696"],tuft:["#E7D2EE","#A984BA"],transitamp:["#F3C9AE","#D58D6C"],iecstem:["#CBE7D6","#75AD8C"],mcell:["#E4D7C9","#B59B82"]}[kind];
+ const [a,b]=palette, edge=b;
+ const packed=`${defs(a,b)}<path d="M24 13Q24 8 31 8h38q7 0 7 5l-4 72q-1 7-8 7H36q-7 0-8-7z" fill="url(#body__ID__)" stroke="${edge}" stroke-width="2.2"/><path d="M29 19v63M71 19v63" fill="none" stroke="#8B665F" stroke-width="1" opacity=".45"/><path d="M25 18h50" stroke="#815C55" stroke-width="2.2"/><path d="M30 87h40" stroke="#677C73" stroke-width="2.2"/>`;
+ const smallNucleus=(x=50,y=71,rx=13,ry=11,fill="#74607A")=>`<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="${fill}" stroke="#504255" stroke-width="1.7"/><circle cx="${x+4}" cy="${y-2}" r="2" fill="#4D3A55"/>`;
+ if(kind==="enterocyte") return packed+Array.from({length:18},(_,i)=>`<path d="M${27+i*2.7} 18v-10" stroke="#A35E4B" stroke-width="1.35" stroke-linecap="round"/>`).join("")+`<path d="M27 21h46" stroke="#B76D59" stroke-width="3"/>${smallNucleus(50,70,12,14)}${[[38,39],[55,35],[63,49],[42,54]].map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="4" ry="2" fill="#B96555" stroke="#8A4E43" stroke-width=".8"/><path d="M${x-2} ${y}q2-2 4 0" fill="none" stroke="#F0B27E" stroke-width=".7"/>`).join("")}<path d="M28 26h44" stroke="#8E675E" stroke-width="1" stroke-dasharray="2 2"/>`;
+ if(kind==="goblet") return packed+`<path d="M31 14q19-9 38 0c0 21-5 38-19 49-14-11-19-28-19-49z" fill="#DDEEF1" stroke="#6E9EAE" stroke-width="1.8"/>${[[39,20,7],[51,18,8],[62,23,7],[42,33,8],[57,35,9],[49,47,8]].map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="#B9DAE2" stroke="#7EAAB8" stroke-width="1"/>`).join("")}<path d="M42 63l-5 20h26l-5-20z" fill="#A8C9D2"/>${smallNucleus(50,76,11,9)}<path d="M43 9h14" stroke="#6E9EAE" stroke-width="2"/>`;
+ if(kind==="paneth") return `${defs(a,b)}<path d="M18 87l9-58q1-8 9-8h28q8 0 9 8l9 58q-16 7-32 2-16 5-32-2z" fill="url(#body__ID__)" stroke="${edge}" stroke-width="2.2"/>${smallNucleus(50,72,13,10)}${[[32,33,5],[43,28,6],[56,31,6],[68,27,5],[37,44,6],[51,43,5],[65,46,6],[46,55,4],[60,56,4]].map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="#D95B45" stroke="#A33D37" stroke-width="1"/><circle cx="${x}" cy="${y}" r="${r-2}" fill="#EA7A58"/>`).join("")}<path d="M31 60q19-8 38 0M31 64q19-8 38 0" fill="none" stroke="#9C5D62" stroke-width="1.4"/><path d="M25 24h50" stroke="#9B5548" stroke-width="2"/>`;
+ if(kind==="endocrine") return packed+`<path d="M46 18l4-10 4 10" fill="none" stroke="#8D5C78" stroke-width="2"/>${smallNucleus(50,55,12,14)}${[[35,72],[43,80],[51,74],[59,82],[67,73],[37,86],[63,88]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="3" fill="#7D466D" stroke="#57324F" stroke-width=".8"/>`).join("")}<path d="M73 72c9 4 12 10 18 11" fill="none" stroke="#B64E54" stroke-width="2"/><path d="M73 78c9 3 12 8 18 8" fill="none" stroke="#4B82A7" stroke-width="2"/>`;
+ if(kind==="tuft") return packed+Array.from({length:9},(_,i)=>`<path d="M${34+i*4} 18Q${32+i*4} 5 ${35+i*4} 0" stroke="#705284" stroke-width="2" stroke-linecap="round"/>`).join("")+`${smallNucleus(50,67,11,13)}${[38,42,46,50,54,58,62].map(x=>`<path d="M${x} 17v37" stroke="#8C6AA0" stroke-width="1.3"/>`).join("")}<path d="M35 52q15-8 30 0M38 57q12-7 24 0M50 80l-4 12" fill="none" stroke="#6D537D" stroke-width="1.4"/>${circles([[39,45],[47,48],[56,43],[61,50]],"#7D5E91",1.8)}`;
+ if(kind==="transitamp") return `${defs(a,b)}<path d="M23 16q0-7 8-7h38q8 0 8 7l-4 68q-1 8-9 8H36q-8 0-9-8z" fill="url(#body__ID__)" stroke="${edge}" stroke-width="2.2"/><path d="M50 10v82" stroke="#A15F5C" stroke-width="1.2" stroke-dasharray="3 2"/><path d="M28 52q22 10 44 0" fill="none" stroke="#A65B61" stroke-width="2"/>${circles([[34,42],[66,42]],"#6E5277",3)}<path d="M35 45l10 8-10 8m30-16-10 8 10 8M44 50h12M44 56h12" fill="none" stroke="#604765" stroke-width="2"/>`;
+ if(kind==="iecstem") return `${defs(a,b)}<path d="M34 12q0-6 7-6h18q7 0 7 6l-5 76H39z" fill="url(#body__ID__)" stroke="${edge}" stroke-width="2.2"/>${smallNucleus(50,62,11,16,"#537565")}<path d="M34 24L20 17l-5 57 24 8M66 24l14-7 5 57-24 8" fill="#E8A080" fill-opacity=".55" stroke="#B86552" stroke-width="1.4"/>${circles([[22,30],[19,42],[79,31],[82,43]],"#C75242",3.5)}<path d="M39 85h22" stroke="#5E786B" stroke-width="2"/>`;
+ return `${defs(a,b)}<path d="M20 18q0-7 8-7h44q8 0 8 7l-5 68q-1 7-8 7H33q-7 0-8-7z" fill="url(#body__ID__)" stroke="${edge}" stroke-width="2.2"/><path d="M23 18q27 7 54 0" fill="none" stroke="#836B5A" stroke-width="2.5"/>${circles([[31,8],[43,6],[58,8],[70,5]],"#9B6C4E",2)}<path d="M50 14v18" stroke="#7D6658" stroke-width="1.5" stroke-dasharray="2 2"/>${circles([[50,30],[50,39],[50,48]],"#D4B56D",3,"stroke=\"#8A6B3D\" stroke-width=\"1\"")}<path d="M31 55q19-17 38 0v28q-7-12-18-11-12 0-20 11z" fill="#F2E8DF" stroke="#8B715E" stroke-width="1.6"/><circle cx="48" cy="70" r="9" fill="#8D68A4" stroke="#604675" stroke-width="1.5"/><path d="M43 67l10 6M53 67l-10 6" stroke="#6A4B82" stroke-width="1"/><path d="M63 61c7 0 10 5 10 10s-4 8-8 9" fill="#B78468" stroke="#755242" stroke-width="1.3"/>`;
+}
+["enterocyte","goblet","paneth","endocrine","tuft","transitamp","iecstem","mcell"].forEach(k=>icons[k]=epithelial(k));
+
+icons.organoid=defs("#F2B8C8","#C87491")+`<path d="M18 55c-8-9-2-22 9-23-1-12 13-20 23-13 8-9 23-4 24 8 12 0 18 14 10 23 9 8 2 23-10 24-1 12-16 17-24 9-9 8-23 0-22-11-11-1-17-10-10-17z" fill="url(#body__ID__)" stroke="#A95674" stroke-width="2.4"/><path d="M36 42c7-9 23-10 30-1 7 9 2 23-9 27-11 4-25-4-25-15 0-4 1-8 4-11z" fill="#FFF1F4" stroke="#BE7089" stroke-width="2"/>${circles([[24,44],[33,27],[50,22],[69,31],[78,48],[69,70],[48,79],[29,65]],"#D786A0",4)}`;
+icons.organoid_dome=`<path d="M8 81h84" stroke="#79AFC2" stroke-width="3" stroke-linecap="round"/><path d="M14 80Q18 23 50 18q32 5 36 62z" fill="#DFF2F7" fill-opacity=".55" stroke="#8AB8C9" stroke-width="2"/>${[[32,61],[55,65],[55,42]].map(([x,y])=>`<g transform="translate(${x-14} ${y-14}) scale(.28)">${icons.organoid}</g>`).join("")}`;
+icons.organoid_plate=`<ellipse cx="50" cy="51" rx="43" ry="38" fill="#E8F3F7" stroke="#88AEBE" stroke-width="2.5"/><ellipse cx="50" cy="49" rx="36" ry="31" fill="#F8FCFD" stroke="#BCD2DB" stroke-width="1.5"/>${[[34,39],[59,37],[40,63],[65,61]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="10" fill="#E7A0B5" stroke="#B96782" stroke-width="1.5"/><circle cx="${x}" cy="${y}" r="4" fill="#FFF0F4"/>`).join("")}`;
+
+icons.muscle=defs("#F3A59B","#C85E59")+`<path d="M7 40q10-17 30-15h46q10 0 12 25-2 25-12 25H37Q17 77 7 60q-5-10 0-20z" fill="url(#body__ID__)" stroke="#A84847" stroke-width="2.2"/>${[22,30,38,46,54,62,70,78].map(x=>`<path d="M${x} 30v40" stroke="#A94D4A" stroke-width="2" opacity=".55"/>`).join("")}${[18,86].map(x=>`<ellipse cx="${x}" cy="50" rx="4" ry="10" fill="#6E4A69"/>`).join("")}`;
+icons.nerve=defs("#B9DDF4","#5A9BCD")+`<path d="M24 46C9 35 8 24 3 18m22 27C11 48 8 61 2 68m26-19C16 62 19 79 11 90M31 40C27 22 35 13 32 4m5 39C46 28 54 25 58 13" fill="none" stroke="#3F7DAE" stroke-width="3" stroke-linecap="round"/><circle cx="31" cy="47" r="17" fill="url(#body__ID__)" stroke="#3F7DAE" stroke-width="2.2"/><circle cx="31" cy="47" r="7" fill="#55749B"/><path d="M47 48C61 48 69 56 83 55s12-10 16-13" fill="none" stroke="#3F7DAE" stroke-width="4"/><path d="M58 50l8 9m3-8 8 9m3-7 7 7" stroke="#E5F2FA" stroke-width="5" opacity=".9"/>`;
+icons.cardiac=defs("#F4ADA3","#D16964")+`<path d="M8 49c13-9 14-25 31-22l12 9 11-12c14-2 17 12 29 15l-8 15c-12-4-18 5-29 8l-12-8-13 13C15 68 11 58 8 49z" fill="url(#body__ID__)" stroke="#AD4C4B" stroke-width="2.2"/>${[30,40,60,70].map(x=>`<path d="M${x} 32l8 28" stroke="#B54E4D" stroke-width="1.5" opacity=".6"/>`).join("")}<ellipse cx="49" cy="49" rx="9" ry="7" fill="#714F69"/><path d="M27 31l6 32M68 29l7 29" stroke="#7E3A3B" stroke-width="3"/>`;
+icons.liver=defs("#F4B1A7","#D6746A")+[[31,36],[50,30],[68,38],[36,57],[57,58]].map(([x,y])=>`<path d="M${x-13} ${y-7}l8-8 13 1 7 10-5 12-13 3-10-7z" fill="url(#body__ID__)" stroke="#B75A54" stroke-width="1.5"/><circle cx="${x}" cy="${y}" r="4" fill="#754D67"/>`).join("");
+icons.fibroblast=defs("#E5C9DF","#A77FA1")+`<path d="M5 58c18-4 23-19 39-21 17-2 25 7 51-1-19 10-20 24-41 27-18 3-28-5-49-5z" fill="url(#body__ID__)" stroke="#7F5C7B" stroke-width="2"/><ellipse cx="51" cy="50" rx="15" ry="8" fill="#654D69" transform="rotate(-8 51 50)"/>`;
+icons.stromal=defs("#D9E3D4","#9FB59B")+`<g fill="none" stroke="#728870" stroke-linecap="round"><path d="M41 43Q27 31 12 14M34 36L8 34M38 58Q23 67 9 85M31 64L8 59M60 42Q73 27 89 14M66 35L91 31M61 59Q76 70 90 87M70 66L93 61" stroke-width="7"/><path d="M12 14L5 9M12 14l1-9M9 85l-5 8m5-8 8 6M89 14l7-7m-7 7-1-10M90 87l7 6m-7-6 1 10" stroke-width="2.5"/></g><path d="M31 43q8-15 24-12 15 2 18 17 3 14-10 22-15 9-28-3-9-9-4-24z" fill="url(#body__ID__)" stroke="#728870" stroke-width="2"/><ellipse cx="52" cy="51" rx="13" ry="9" fill="#6C686F"/><path d="M43 49q9-5 18 0M44 55q8 4 16 0" fill="none" stroke="#4D5152" stroke-width="1"/>`;
+icons.adipocyte=defs("#FFE5A6","#E8B95E")+`<circle cx="50" cy="50" r="40" fill="url(#body__ID__)" stroke="#C69338" stroke-width="2.3"/><circle cx="49" cy="49" r="31" fill="#FFF1BE" stroke="#D8B059" stroke-width="1.6"/><ellipse cx="73" cy="70" rx="7" ry="5" fill="#6A566D"/><path d="M73 65q8-4 11-12M72 75q7 2 10 7" fill="none" stroke="#B98435" stroke-width="1.2"/>`;
+
+icons.cell=roundCell({a:"#F7C9C1",b:"#DF827B",edge:"#B85D58",n:"#76566F",ns:"#503B50"});
+icons.nucleus=defs("#D7C2E9","#9070AB")+`<circle cx="50" cy="50" r="37" fill="url(#body__ID__)" stroke="#684D82" stroke-width="2.5"/><circle cx="50" cy="50" r="13" fill="#684D82"/><circle cx="46" cy="46" r="5" fill="#A98BC0"/>${Array.from({length:12},(_,i)=>{let a=i*Math.PI/6;return `<circle cx="${50+37*Math.cos(a)}" cy="${50+37*Math.sin(a)}" r="1.8" fill="#F4EAF8" stroke="#684D82" stroke-width=".8"/>`;}).join("")}`;
+icons.mitochondria=defs("#F6B28D","#D96A57")+`<path d="M13 52c2-23 23-37 47-33 21 3 34 18 27 38-7 21-32 29-53 21-14-5-22-14-21-26z" fill="url(#body__ID__)" stroke="#AB4C43" stroke-width="2.5"/><path d="M24 55c8-20 14 14 23-8s15 17 25-7" fill="none" stroke="#F7D29D" stroke-width="5" stroke-linecap="round"/><path d="M24 55c8-20 14 14 23-8s15 17 25-7" fill="none" stroke="#A94E45" stroke-width="1.6"/>`;
+icons.er=`<path d="M14 30c18-14 31 5 46-6 12-9 22-2 28 3M10 43c18-14 32 6 49-5 12-8 22-2 30 4M11 57c18-14 31 6 49-5 13-8 22-1 29 5M15 71c18-13 29 6 45-4 12-8 21-2 27 4" fill="none" stroke="#7FA9C5" stroke-width="7" stroke-linecap="round"/>${circles([[18,25],[27,32],[40,35],[54,27],[70,20],[80,28],[16,45],[31,46],[47,42],[63,39],[78,42],[18,59],[35,61],[51,56],[68,53],[82,58],[22,73],[39,75],[56,69],[73,68]],"#4E6784",1.8)}`;
+icons.golgi=`${[0,1,2,3,4].map(i=>`<path d="M20 ${31+i*9}Q50 ${17+i*8} 80 ${31+i*9}" fill="none" stroke="${["#EFA08D","#E88B80","#DB7772","#C9686A","#B75B65"][i]}" stroke-width="7" stroke-linecap="round"/>`).join("")}${circles([[17,26],[83,37],[22,77],[78,72],[88,55]],"#E99A89",4,"stroke=\"#B75B65\" stroke-width=\"1.2\"")}`;
+icons.vesicle=defs("#D6EEF3","#8DC4D1")+`<circle cx="50" cy="50" r="36" fill="url(#body__ID__)" fill-opacity=".72" stroke="#5E98A8" stroke-width="2.5"/>${circles([[36,39],[55,34],[65,52],[42,61],[57,67]],"#C27891",4)}${shine}`;
+icons.dna=`<path d="M28 8c36 21 8 63 44 84M72 8C36 29 64 71 28 92" fill="none" stroke="#4D8FBD" stroke-width="5" stroke-linecap="round"/>${[18,29,40,51,62,73,84].map((y,i)=>`<path d="M${i%2?34:29} ${y}L${i%2?66:71} ${y+2}" stroke="#E17879" stroke-width="3" stroke-linecap="round"/>`).join("")}`;
+icons.rna=`<path d="M14 73c10-5 14-19 20-32 5-11 15-17 24-11 14 9-3 26-12 16-7-8 3-19 15-15 14 5 12 25 23 33" fill="none" stroke="#63A47E" stroke-width="5" stroke-linecap="round"/>${circles([[18,69],[27,55],[35,38],[49,28],[61,33],[53,47],[71,49],[82,64]],"#E39A62",2.5)}`;
+icons.protein=`<path d="M18 66c4-24 21-41 38-33 10 5-3 17-11 10-8-7 5-22 19-16 18 8 15 33 4 45-12 13-31 6-23-7 6-9 19-1 13 8" fill="none" stroke="#8E68B0" stroke-width="7" stroke-linecap="round"/><path d="M24 28l12-7 11 7-11 7zM64 56l14-6-2 13-13 5z" fill="#E4A15E" stroke="#B66C35" stroke-width="1.5"/>`;
+icons.antibody=`<path d="M50 88V53M50 55L22 20M50 55l28-35" fill="none" stroke="#D26F76" stroke-width="10" stroke-linecap="round"/><path d="M50 55L27 25M50 55l23-30" fill="none" stroke="#F4B5B1" stroke-width="4" stroke-linecap="round"/>`;
+icons.virus=`<polygon points="50,14 77,30 84,59 64,82 34,82 16,59 23,30" fill="#D6C4E9" stroke="#6D548D" stroke-width="2.5"/>${circles([[50,31],[34,43],[65,45],[42,64],[61,65]],"#8669A5",4)}${[[50,7,50,15],[85,22,77,30],[94,60,84,59],[70,91,64,82],[29,91,34,82],[6,60,16,59],[15,22,23,30]].map(p=>`<path d="M${p[0]} ${p[1]}L${p[2]} ${p[3]}" stroke="#6D548D" stroke-width="2"/><circle cx="${p[0]}" cy="${p[1]}" r="3" fill="#E5898A"/>`).join("")}`;
+icons.bacterium=defs("#CDE5A9","#79AF65")+`<rect x="16" y="27" width="68" height="46" rx="23" fill="url(#body__ID__)" stroke="#4E874B" stroke-width="2.5"/>${circles([[30,40],[43,59],[59,38],[70,58]],"#588653",2)}<path d="M23 73q-8 14 6 18M44 74q-4 11 8 18M70 70q12 9 7 21M84 48q14-13 15 1M17 42Q3 35 5 22" fill="none" stroke="#4E874B" stroke-width="2" stroke-linecap="round"/>${shine}`;
+
+function plot(kind){
+ const axes=`<path d="M17 14v68h70" fill="none" stroke="#59636C" stroke-width="2" stroke-linecap="round"/>`;
+ if(kind==="umap") return circles([[28,30],[33,25],[37,34],[25,39],[44,29]],"#4D9CC7",3)+circles([[61,29],[68,35],[73,27],[76,39],[64,43]],"#E17B73",3)+circles([[42,65],[50,72],[55,62],[35,72],[47,57]],"#78AE69",3);
+ if(kind==="volcano") return axes+`<path d="M17 57h70M35 14v68M69 14v68" stroke="#A9ADB0" stroke-width="1" stroke-dasharray="4 3"/>`+circles([[25,67],[30,58],[34,47],[38,37],[43,62],[49,69],[56,59],[62,43],[67,31],[72,23],[77,17]],"#8A93A0",2)+circles([[30,53],[34,42],[38,31]],"#4D8FC1",3)+circles([[64,38],[70,26],[76,18]],"#D76666",3);
+ if(kind==="heatmap") return `${Array.from({length:25},(_,i)=>{let x=26+(i%5)*11,y=25+Math.floor(i/5)*11,v=(i*7)%5,c=["#477DB3","#90B5D4","#F1E2D7","#E9A08F","#C95858"][v];return `<rect x="${x}" y="${y}" width="10" height="10" fill="${c}"/>`;}).join("")}<path d="M25 20h54M20 25v54M25 20l6-7 7 7 7-11 8 11 10-8 16 8M20 25l-7 7 7 7-10 8 10 8-6 12 6 12" fill="none" stroke="#555F68" stroke-width="1.5"/>`;
+ if(kind==="barplot") return axes+[[25,55,13,"#78A8CC"],[42,35,33,"#E58A7F"],[59,25,43,"#E6B35E"],[76,45,23,"#82AF79"]].map(([x,y,h,c])=>`<rect x="${x}" y="${y}" width="10" height="${h}" rx="2" fill="${c}"/>`).join("");
+ if(kind==="boxplot") return axes+[[30,34,55,"#78A8CC"],[50,25,47,"#E58A7F"],[70,42,64,"#82AF79"]].map(([x,y1,y2,c])=>`<path d="M${x} ${y1-10}v${y2-y1+20}M${x-5} ${y1-10}h10M${x-5} ${y2+10}h10" stroke="#59636C" stroke-width="1.5"/><rect x="${x-8}" y="${y1}" width="16" height="${y2-y1}" fill="${c}" fill-opacity=".7" stroke="#59636C"/><path d="M${x-8} ${(y1+y2)/2}h16" stroke="#59636C" stroke-width="2"/>`).join("");
+ if(kind==="violin") return axes+[[32,"#78A8CC"],[53,"#E58A7F"],[74,"#82AF79"]].map(([x,c])=>`<path d="M${x} 24c-13 12-11 22-3 28-10 8-8 19 3 26 11-7 13-18 3-26 8-6 10-16-3-28z" fill="${c}" fill-opacity=".72" stroke="#59636C"/><path d="M${x} 31v40M${x-4} 49h8" stroke="#fff" stroke-width="1.5"/>`).join("");
+ if(kind==="scatter") return axes+circles([[25,67],[31,60],[39,63],[42,51],[50,48],[57,43],[62,35],[72,33],[78,23]],"#5B9BC3",3)+`<path d="M22 70L80 22" stroke="#D66C68" stroke-width="2"/>`;
+ if(kind==="lineplot") return axes+`<path d="M22 69l13-15 12 6 14-23 18-12" fill="none" stroke="#4D91BE" stroke-width="3"/><path d="M22 61l15-9 13-14 16 8 13-19" fill="none" stroke="#DD746D" stroke-width="3"/>`;
+ if(kind==="piechart") return `<circle cx="50" cy="50" r="34" fill="none" stroke="#72A5C8" stroke-width="16"/><path d="M50 16a34 34 0 0129 52" fill="none" stroke="#E07872" stroke-width="16"/><path d="M79 68a34 34 0 01-27 16" fill="none" stroke="#E3B45E" stroke-width="16"/>`;
+ if(kind==="facs") return axes+`<path d="M52 15v67M17 50h70" stroke="#8A9299" stroke-width="1.2"/>`+circles([[29,65],[33,61],[38,66],[63,34],[68,30],[73,36],[67,41],[57,27]],"#5A9CC3",2.3);
+ if(kind==="survival") return axes+`<path d="M20 24h18v9h11v10h13v13h10v10h12" fill="none" stroke="#4D91BE" stroke-width="3"/><path d="M20 31h12v14h13v13h12v11h27" fill="none" stroke="#DD746D" stroke-width="3"/>${lines(["M47 39v8","M68 52v8","M40 53v8","M73 62v8"],"#555",1.3)}`;
+ if(kind==="network") return lines(["M25 30L50 20L73 33L68 65L43 76L22 58L50 20L43 76L73 33L22 58"],"#73808A",2)+[[25,30,"#E17B73"],[50,20,"#78A8CC"],[73,33,"#E6B35E"],[68,65,"#82AF79"],[43,76,"#9A7CB5"],[22,58,"#70B5AB"]].map(([x,y,c])=>`<circle cx="${x}" cy="${y}" r="7" fill="${c}" stroke="#fff" stroke-width="2"/>`).join("");
+ if(kind==="dendrogram") return `<path d="M18 80V65h18V48h18V29h28M36 65h16V53M54 48h15V38M18 80h12M52 65h12M69 48h14M54 29h10M82 29h7" fill="none" stroke="#62737E" stroke-width="2.5" stroke-linejoin="round"/>`;
+ return `<rect x="15" y="20" width="70" height="61" rx="3" fill="#E9E4DD" stroke="#777" stroke-width="2"/>${[31,45,59,73].map(x=>`<path d="M${x} 26v49" stroke="#B7B2AB"/>`).join("")}${[[31,38,12],[31,58,18],[45,34,20],[45,64,9],[59,42,16],[59,57,22],[73,30,11],[73,68,17]].map(([x,y,w])=>`<rect x="${x-w/2}" y="${y}" width="${w}" height="4" rx="2" fill="#41464C"/>`).join("")}<path d="M22 27v47" stroke="#D05E60" stroke-width="2"/>`;
+}
+["umap","volcano","heatmap","barplot","boxplot","violin","scatter","lineplot","piechart","facs","survival","network","dendrogram","westernblot"].forEach(k=>icons[k]=plot(k));
+
+function lab(kind){
+ const dark="#53616B", blue="#78A9C5", pink="#E68B83", yellow="#E7B25D", green="#79A56A", glass="#DFF1F5";
+ if(kind==="sequencer") return `<rect x="15" y="22" width="70" height="58" rx="8" fill="#D9E2E5" stroke="${dark}" stroke-width="2.2"/><rect x="25" y="31" width="31" height="21" rx="3" fill="#243D4B"/><path d="M29 45l7-6 6 4 9-8" fill="none" stroke="#70D1D2" stroke-width="2"/><rect x="63" y="32" width="12" height="7" rx="2" fill="${pink}"/><circle cx="69" cy="52" r="4" fill="${green}"/><rect x="25" y="61" width="50" height="10" rx="3" fill="#B8C7CC"/>`;
+ if(kind==="microscope") return `<path d="M39 14h18v14H39zM47 28l12 25M58 52c15 2 21 11 17 23M30 79h51" fill="none" stroke="${dark}" stroke-width="7" stroke-linecap="round"/><path d="M26 58h42M39 58v12" stroke="#8AA0AA" stroke-width="5"/><circle cx="57" cy="54" r="5" fill="${yellow}"/><rect x="31" y="75" width="50" height="10" rx="5" fill="#9EB1B8" stroke="${dark}" stroke-width="2"/>`;
+ if(kind==="flask") return `<path d="M40 14h20v25l25 37q4 8-6 8H21q-10 0-6-8l25-37z" fill="${glass}" fill-opacity=".72" stroke="#5E8E9F" stroke-width="2.5"/><path d="M22 67q28-9 56 0l8 13H14z" fill="${pink}" fill-opacity=".75"/><path d="M42 24h16" stroke="#fff" stroke-width="3" opacity=".8"/>`;
+ if(kind==="testtube") return `<path d="M37 15h26v56a13 13 0 01-26 0z" fill="${glass}" stroke="#5E8E9F" stroke-width="2.5"/><path d="M40 53h20v18a10 10 0 01-20 0z" fill="${pink}"/><path d="M20 18h60M26 18v70M74 18v70M18 88h64" stroke="${dark}" stroke-width="3" stroke-linecap="round"/>`;
+ if(kind==="petri"||kind==="dish") return `<ellipse cx="50" cy="52" rx="41" ry="29" fill="${kind==="dish"?"#F5C3C1":"#E2F0E1"}" fill-opacity=".75" stroke="#6F9EAA" stroke-width="2.5"/><ellipse cx="50" cy="45" rx="41" ry="27" fill="#fff" fill-opacity=".25" stroke="#8AB2BF" stroke-width="1.5"/>${kind==="petri"?circles([[28,43],[43,55],[59,37],[69,54],[52,47]],yellow,3):circles([[31,48],[41,42],[51,55],[61,44],[70,52]],"#D77A79",2)}`;
+ if(kind==="microplate") return `<path d="M11 27l10-9h68v58l-10 8H11z" fill="#DCEAF0" stroke="#63899B" stroke-width="2.3"/>${Array.from({length:48},(_,i)=>{let x=19+(i%8)*9,y=29+Math.floor(i/8)*8;return `<ellipse cx="${x}" cy="${y}" rx="3.1" ry="2.6" fill="${i%5===0?pink:"#AFCBD7"}" stroke="#6F96A7" stroke-width=".7"/>`;}).join("")}`;
+ if(kind==="pipette") return `<g transform="rotate(-32 50 50)"><rect x="40" y="8" width="20" height="51" rx="8" fill="${blue}" stroke="#4F7790" stroke-width="2"/><rect x="44" y="2" width="12" height="14" rx="3" fill="${pink}"/><path d="M46 59h8l-2 34h-4z" fill="#DDECF0" stroke="#668D9B" stroke-width="1.5"/><path d="M43 27h14M43 36h14" stroke="#EAF4F7" stroke-width="2"/></g>`;
+ if(kind==="pcrtube") return `${Array.from({length:8},(_,i)=>{let x=7+i*11;return `<path d="M${x} 30h10l-1 37q-4 9-8 0z" fill="#DCEEF2" stroke="#648C9C" stroke-width="1.3"/><rect x="${x-1}" y="24" width="12" height="7" rx="2" fill="${i%2?blue:pink}"/>`;}).join("")}<path d="M6 25h89" stroke="#53616B" stroke-width="2"/>`;
+ if(kind==="centrifuge") return `<rect x="14" y="28" width="72" height="55" rx="9" fill="#D8E1E4" stroke="${dark}" stroke-width="2.2"/><ellipse cx="50" cy="34" rx="29" ry="20" fill="#B9CDD4" stroke="${dark}" stroke-width="2"/><circle cx="50" cy="34" r="13" fill="#6F8790"/>${[0,90,180,270].map(a=>`<rect x="47" y="20" width="6" height="12" rx="2" fill="${pink}" transform="rotate(${a} 50 34)"/>`).join("")}<rect x="28" y="64" width="25" height="9" rx="2" fill="#263D48"/><circle cx="68" cy="68" r="5" fill="${green}"/>`;
+ if(kind==="syringe") return `<g transform="rotate(-28 50 50)"><rect x="27" y="35" width="46" height="23" rx="3" fill="#E7F3F5" stroke="#5F8998" stroke-width="2"/><path d="M34 36v21M41 39v7M48 39v7M55 39v7M62 39v7" stroke="#759AA7"/><rect x="18" y="40" width="10" height="13" fill="#C5D7DC" stroke="#5F8998"/><path d="M9 34v25M9 47h9M73 47h22" stroke="${dark}" stroke-width="2.5"/><path d="M95 47h5" stroke="#A0A8AB"/></g>`;
+ if(kind==="vial") return `<rect x="30" y="25" width="40" height="59" rx="8" fill="${glass}" stroke="#5E8E9F" stroke-width="2.3"/><rect x="27" y="15" width="46" height="18" rx="4" fill="${blue}" stroke="#4F7790" stroke-width="2"/><path d="M33 57h34v23H33z" fill="${yellow}" fill-opacity=".75"/><rect x="39" y="39" width="22" height="12" rx="2" fill="#fff"/>`;
+ if(kind==="incubator"||kind==="freezer") return `<rect x="23" y="8" width="54" height="84" rx="5" fill="#D8E1E4" stroke="${dark}" stroke-width="2.5"/><rect x="30" y="16" width="40" height="${kind==="incubator"?55:61}" rx="3" fill="${kind==="incubator"?"#829AA3":"#EEF4F5"}" stroke="#647983" stroke-width="1.8"/>${kind==="incubator"?[29,43,57].map(y=>`<path d="M34 ${y}h32" stroke="#D8E8EA" stroke-width="2"/>`).join(""):`<rect x="35" y="23" width="30" height="14" rx="3" fill="#263D48"/><text x="50" y="34" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#70D4D1">−80</text>`}<circle cx="68" cy="83" r="3" fill="${green}"/>`;
+ if(kind==="scale") return `<path d="M25 30q25-15 50 0l-6 22H31z" fill="#DDE8EA" stroke="${dark}" stroke-width="2"/><rect x="18" y="49" width="64" height="35" rx="6" fill="#BECED3" stroke="${dark}" stroke-width="2.3"/><rect x="33" y="59" width="27" height="11" rx="2" fill="#263D48"/><path d="M50 30V17" stroke="${dark}" stroke-width="3"/><ellipse cx="50" cy="16" rx="22" ry="6" fill="#E4ECEE" stroke="${dark}" stroke-width="2"/>`;
+ if(kind==="computer") return `<rect x="12" y="15" width="76" height="54" rx="5" fill="#D9E2E5" stroke="${dark}" stroke-width="2.4"/><rect x="19" y="22" width="62" height="39" fill="#213B48"/><path d="M25 52l9-9 9 5 9-16 10 12 13-15" fill="none" stroke="#68CCD0" stroke-width="2"/>${circles([[29,31],[40,37],[55,29],[68,48]],pink,2)}<path d="M44 69v10M56 69v10M32 80h36" stroke="${dark}" stroke-width="4"/>`;
+ if(kind==="database") return `<path d="M24 23q26-15 52 0v52q-26 15-52 0z" fill="#78A9C5" stroke="#4F7790" stroke-width="2.4"/><ellipse cx="50" cy="23" rx="26" ry="11" fill="#A8CBDD" stroke="#4F7790" stroke-width="2"/><path d="M24 40q26 15 52 0M24 57q26 15 52 0" fill="none" stroke="#DDEEF5" stroke-width="2"/>`;
+ if(kind==="mouse") return `<path d="M17 59c4-19 23-30 44-23 16 5 19 18 11 29-9 13-36 18-50 7-4-3-6-8-5-13z" fill="#E5DDD4" stroke="#8A7A70" stroke-width="2.2"/><circle cx="70" cy="44" r="10" fill="#E5DDD4" stroke="#8A7A70" stroke-width="2"/><circle cx="76" cy="41" r="2" fill="#333"/><circle cx="66" cy="34" r="7" fill="#E8B2B0" stroke="#8A7A70"/><path d="M20 66C6 76 5 88 17 90" fill="none" stroke="#B58C89" stroke-width="2"/><path d="M38 73l-4 10M57 73l4 10" stroke="#8A7A70" stroke-width="2"/>`;
+ if(kind==="target") return `<path d="M13 59c6-22 22-43 44-36 12 4 10 15 20 20 14 7 9 28-7 32-14 4-22-5-34 1-13 7-28-3-23-17z" fill="#9B79B4" stroke="#684D82" stroke-width="2.2"/><path d="M48 37c13-8 23 4 18 14-4 8-14 6-18 14" fill="#E7D7EF" stroke="#684D82" stroke-width="2"/>${circles([[52,54],[61,48],[57,42]],yellow,3)}<path d="M75 20l8 8-18 20-8-8z" fill="${pink}" stroke="#A64F4D" stroke-width="1.5"/>`;
+ return `<g transform="rotate(25 50 50)"><rect x="17" y="34" width="66" height="32" rx="16" fill="${pink}" stroke="#AD5654" stroke-width="2.4"/><path d="M50 35v30" stroke="#7D6262" stroke-width="1.4"/><path d="M50 36h17q14 0 14 14t-14 14H50z" fill="${blue}"/>${circles([[30,45],[38,54],[61,46],[69,55]],"#E8C16E",2)}</g>`;
+}
+["sequencer","microscope","flask","testtube","petri","dish","microplate","pipette","pcrtube","centrifuge","syringe","vial","incubator","freezer","scale","computer","database","mouse","target","pill"].forEach(k=>icons[k]=lab(k));
+
+/* Fine biological/technical structure layered onto the readable silhouettes. */
+function detailOverlay(id){
+ const tinyMito=(x,y,r=0)=>`<g transform="translate(${x} ${y}) rotate(${r})"><ellipse rx="5" ry="2.6" fill="#D87863" stroke="#9C4C43" stroke-width=".8"/><path d="M-3 0q2-2 3 0t3 0" fill="none" stroke="#F0B07F" stroke-width=".7"/></g>`;
+ const roundStem=["pluripotent","bloodstem","lymphoidprog","myeloidprog","tprecursor","bprecursor"];
+ if(roundStem.includes(id)) return `${tinyMito(28,54,-35)}${tinyMito(72,58,25)}<path d="M28 43q6-5 11-2M64 37q5-4 9 0" fill="none" stroke="#6B7780" stroke-width="1"/><circle cx="58" cy="49" r="2.5" fill="#D8C69A" stroke="#68506B" stroke-width=".8"/>`;
+ if(id==="nkcell") return `<path d="M22 58q12 12 27 13" fill="none" stroke="#4A345E" stroke-width="1.2"/>${circles([[25,58],[31,65],[39,69]],"#352443",2.7)}<circle cx="46" cy="64" r="2" fill="#C7A8D8"/>`;
+ if(id==="tcell") return `<path d="M30 65q8 7 17 6M68 65q-7 6-14 6" fill="none" stroke="#385F88" stroke-width="1"/>${circles([[28,55],[73,51]],"#517EAA",1.5)}`;
+ if(id==="bcell") return `<path d="M32 66q8 6 16 5M68 64q-7 7-15 7" fill="none" stroke="#436A50" stroke-width="1"/>${circles([[29,54],[71,53]],"#5C8662",1.4)}`;
+ if(id==="plasma") return `<path d="M20 34q12-9 22 0M18 41q13-9 25 0M18 49q12-8 23 0M22 58q9-6 18 0" fill="none" stroke="#4E7890" stroke-width="2"/><path d="M37 49q7-7 13 0q-7 6-13 0z" fill="#E8E0C8" stroke="#7A7768" stroke-width="1"/>`;
+ if(id==="memory") return `${tinyMito(26,59,-25)}<path d="M70 56q6 4 8 10" stroke="#2D5A8C" fill="none" stroke-width="1.2"/>`;
+ if(id==="immune") return `${tinyMito(24,65,-30)}${circles([[72,62],[78,54]],"#755F86",1.7)}`;
+ if(id==="macrophage") return `<circle cx="30" cy="43" r="7" fill="#E8B16A" stroke="#8E6240" stroke-width="1.2"/><path d="M26 43h8M30 39v8" stroke="#7A4F35" stroke-width="1"/>${circles([[67,34],[72,61],[40,70]],"#704C83",2.2)}<path d="M14 44q-8-2-10 5M80 32q7-5 13-1" fill="none" stroke="#704477" stroke-width="2"/>`;
+ if(id==="dendritic") return `${[[25,28],[72,29],[24,63],[76,66]].map(([x,y])=>`<path d="M${x-3} ${y}l3-4 3 4-3 4z" fill="#7D5C7B" stroke="#593C5C" stroke-width=".7"/>`).join("")}<path d="M40 55q11 8 22 0" fill="none" stroke="#A9553A" stroke-width="1.2"/>`;
+ if(id==="mast") return `<path d="M80 58q9 3 14 9M78 65q8 6 11 13" fill="none" stroke="#754E86" stroke-width="1.3"/>${circles([[90,67],[94,73],[87,79]],"#71457F",2.3)}`;
+ if(["neutrophil","eosinophil","basophil"].includes(id)) return `<path d="M20 50q4-18 16-26M80 50q-4-18-16-26" fill="none" stroke="#9E6879" stroke-width=".8" opacity=".65"/>`;
+ if(id==="monocyte") return `<circle cx="27" cy="64" r="5" fill="#BFD1D9" stroke="#6B8492"/><circle cx="73" cy="66" r="3.5" fill="#C7D8DE" stroke="#6B8492"/>${tinyMito(68,33,20)}`;
+ if(id==="megakaryocyte") return `<path d="M75 73q8 1 9 10M69 79q-1 8 10 12M61 82q-2 9 7 14" fill="none" stroke="#765285" stroke-width="2.5"/>${circles([[85,86],[80,92],[69,96]],"#8A6AA2",3)}`;
+ if(id==="platelets") return `<path d="M24 36l-9-7M43 25l2-10M61 39l10-8M32 59l-11 5M73 67l10 7" stroke="#654B7A" stroke-width="1.2"/>${circles([[22,36],[61,39],[32,59]],"#D7C5E5",1.2)}`;
+ if(id==="organoid") return `${[[26,41],[34,27],[50,22],[68,31],[78,48],[69,70],[49,79],[29,65]].map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="2" ry="3" fill="#744B68"/>`).join("")}<path d="M18 55q8-2 12 4M75 31q-4 7 2 13" fill="none" stroke="#9E4F6B" stroke-width="1.2"/>`;
+ if(id==="organoid_dome") return `<path d="M22 69q27-39 56 0" fill="none" stroke="#B4D4DE" stroke-width="1" stroke-dasharray="2 3"/>${circles([[25,34],[72,52],[44,72]],"#9CBFCB",1.2)}`;
+ if(id==="organoid_plate") return `<path d="M15 50q35-16 70 0" fill="none" stroke="#A4C4CF" stroke-width="1"/><circle cx="25" cy="67" r="6" fill="#E5A2B5" stroke="#B96782"/><circle cx="25" cy="67" r="2.5" fill="#F9E8ED"/>`;
+ if(id==="muscle") return `${[26,34,42,50,58,66,74].map(x=>`<path d="M${x} 27v46" stroke="#793D3E" stroke-width=".8"/><path d="M${x+3} 27v46" stroke="#E8A29A" stroke-width="1"/>`).join("")}<path d="M10 43h82M10 57h82" stroke="#A64B49" stroke-width="1"/>`;
+ if(id==="nerve") return `<path d="M58 50l7 10M69 52l7 9M80 53l7 7" stroke="#496F94" stroke-width="1"/><circle cx="31" cy="47" r="3" fill="#314E71"/>${circles([[20,36],[17,55],[37,31]],"#6CA5CE",1.7)}`;
+ if(id==="cardiac") return `${tinyMito(34,48,65)}${tinyMito(64,48,65)}<path d="M16 45l68-4M18 53l64-4" stroke="#F0A39A" stroke-width="1"/>`;
+ if(id==="liver") return `<path d="M22 47q27 9 56 0" fill="none" stroke="#BA6E45" stroke-width="2"/><path d="M20 52q29 10 60 0" fill="none" stroke="#4D87A6" stroke-width="2"/>${circles([[35,47],[50,51],[65,47]],"#E2B459",1.6)}`;
+ if(id==="fibroblast") return `<path d="M9 72q32-21 82-9M12 79q35-20 76-11" fill="none" stroke="#8BA28B" stroke-width="1.4"/><path d="M28 49h45M33 55h35" stroke="#7D5877" stroke-width="1"/>`;
+ if(id==="stromal") return `<path d="M10 20L89 79M8 74L82 18M3 50h94" stroke="#A6B6A3" stroke-width="1" stroke-dasharray="4 3"/>`;
+ if(id==="cell") return `${tinyMito(26,57,-35)}${tinyMito(73,61,30)}<path d="M22 39q10-8 18 0M21 44q10-8 18 0M62 34q8 4 15 0M62 39q8 4 15 0" fill="none" stroke="#9A5F68" stroke-width="1.2"/>${circles([[35,72],[64,75]],"#C58A5D",2)}`;
+ if(id==="nucleus") return `<path d="M26 42q9-13 17 0t16 0 16 0M24 58q10-12 18 0t16 0 17 0" fill="none" stroke="#75578E" stroke-width="1.2"/>${circles([[31,31],[69,34],[34,70],[67,67]],"#65497C",1.4)}`;
+ if(id==="mitochondria") return `<circle cx="38" cy="43" r="3" fill="none" stroke="#754E49" stroke-width="1"/><path d="M35 43q3-4 6 0t-6 0" fill="none" stroke="#754E49" stroke-width=".8"/>${circles([[68,62],[75,52]],"#7A4F49",1.2)}`;
+ if(id==="er") return `<path d="M18 21q18-9 35 0t30 0" fill="none" stroke="#6F98B2" stroke-width="3"/>${circles([[23,20],[39,18],[55,23],[72,19]],"#4E6784",1.6)}`;
+ if(id==="golgi") return `<path d="M16 23q7-5 14 0M73 77q7 5 13 0" fill="none" stroke="#B75B65" stroke-width="1.3"/>${circles([[13,20],[87,78]],"#DA7C78",3)}`;
+ if(id==="vesicle") return `${Array.from({length:14},(_,i)=>{let a=i*Math.PI/7;return `<circle cx="${50+37*Math.cos(a)}" cy="${50+37*Math.sin(a)}" r="1.6" fill="#587F8C"/>`;}).join("")}<path d="M30 68q20 11 40 0" fill="none" stroke="#6A99A6" stroke-width="1"/>`;
+ if(id==="dna") return `<text x="18" y="13" font-size="7" font-family="sans-serif" fill="#4B5963">5′</text><text x="76" y="13" font-size="7" font-family="sans-serif" fill="#4B5963">3′</text><path d="M34 25h32M31 54h38M35 78h30" stroke="#9D6670" stroke-width=".7"/>`;
+ if(id==="rna") return `<text x="10" y="79" font-size="7" font-family="sans-serif" fill="#4B5963">5′</text><text x="84" y="70" font-size="7" font-family="sans-serif" fill="#4B5963">3′</text>`;
+ if(id==="protein") return `<path d="M24 77q22 11 47-1" fill="none" stroke="#5F4779" stroke-width="1.2"/>${circles([[42,49],[53,43],[60,54]],"#E2B25E",2)}`;
+ if(id==="antibody") return `<path d="M45 54h10M46 59h8" stroke="#8F4E57" stroke-width="1.4"/><circle cx="22" cy="19" r="3" fill="#E3B45E"/><circle cx="78" cy="19" r="3" fill="#E3B45E"/>`;
+ if(id==="virus") return `<circle cx="50" cy="50" r="42" fill="none" stroke="#C46F83" stroke-width="3"/>${[0,45,90,135,180,225,270,315].map(a=>{let q=a*Math.PI/180;return `<path d="M${50+42*Math.cos(q)} ${50+42*Math.sin(q)}l${5*Math.cos(q)} ${5*Math.sin(q)}" stroke="#8C5270" stroke-width="1.5"/><circle cx="${50+48*Math.cos(q)}" cy="${50+48*Math.sin(q)}" r="2.2" fill="#E58A8B"/>`;}).join("")}`;
+ if(id==="bacterium") return `<path d="M30 53q10-18 28-7t12 13" fill="none" stroke="#3F7043" stroke-width="1.6"/>${circles([[27,37],[36,45],[48,35],[58,57],[69,42],[73,61]],"#3F7043",1.2)}<path d="M22 34h56M22 66h56" stroke="#9CC985" stroke-width="1"/>`;
+ return "";
+}
+
+Object.keys(icons).forEach(id=>{icons[id]+=detailOverlay(id);});
+
+const plotIds=new Set(["umap","volcano","heatmap","barplot","boxplot","violin","scatter","lineplot","piechart","facs","survival","network","dendrogram","westernblot"]);
+for(const id of plotIds){
+ if(!["umap","piechart","network","heatmap","westernblot"].includes(id)) icons[id]+=`<path d="M27 80v3M39 80v3M51 80v3M63 80v3M75 80v3M14 68h3M14 54h3M14 40h3M14 26h3" stroke="#59636C" stroke-width="1"/><text x="83" y="89" font-size="5" font-family="sans-serif" fill="#59636C">x</text><text x="7" y="17" font-size="5" font-family="sans-serif" fill="#59636C">y</text>`;
+ if(id==="umap") icons[id]+=`<path d="M16 84h67M16 84V18" stroke="#59636C" stroke-width="1.5"/><text x="69" y="16" font-size="5" font-family="sans-serif" fill="#59636C">cluster</text><circle cx="65" cy="13" r="2" fill="#E17B73"/>`;
+ if(id==="piechart") icons[id]+=`<rect x="78" y="24" width="5" height="5" fill="#E07872"/><rect x="78" y="32" width="5" height="5" fill="#72A5C8"/><rect x="78" y="40" width="5" height="5" fill="#E3B45E"/>`;
+ if(id==="network") icons[id]+=`<path d="M50 20l-4 8h8zM68 65l-4-8h8z" fill="#59636C"/><path d="M73 33l8 0" stroke="#59636C" stroke-width="2"/><path d="M81 27v12" stroke="#59636C" stroke-width="2"/>`;
+ if(id==="westernblot") icons[id]+=`<text x="11" y="20" font-size="5" font-family="sans-serif" fill="#555">kDa</text><text x="24" y="91" font-size="5" font-family="sans-serif" fill="#555">C</text><text x="42" y="91" font-size="5" font-family="sans-serif" fill="#555">T1</text><text x="61" y="91" font-size="5" font-family="sans-serif" fill="#555">T2</text>`;
+}
+
+const labIds=new Set(["sequencer","microscope","flask","testtube","petri","dish","microplate","pipette","pcrtube","centrifuge","syringe","vial","incubator","freezer","scale","computer","database","mouse","target","pill"]);
+for(const id of labIds){
+ if(id==="microscope") icons[id]+=`<circle cx="68" cy="62" r="5" fill="none" stroke="#53616B" stroke-width="2"/><circle cx="68" cy="62" r="2" fill="#53616B"/>`;
+ if(id==="flask"||id==="testtube"||id==="vial") icons[id]+=`<path d="M29 62h7M29 69h7M64 62h7M64 69h7" stroke="#5E8E9F" stroke-width="1"/>`;
+ if(id==="petri") icons[id]+=`<path d="M25 58q13-22 43-14" fill="none" stroke="#D4A447" stroke-width="1" stroke-dasharray="2 2"/>`;
+ if(id==="dish") icons[id]+=`${[[28,43],[38,50],[48,40],[58,54],[68,45]].map(([x,y])=>`<path d="M${x-3} ${y}q3-4 6 0q-3 4-6 0z" fill="#C96D73" stroke="#9B4F56" stroke-width=".6"/>`).join("")}`;
+ if(id==="mouse") icons[id]+=`<path d="M78 45l12-4M78 48l13 2M75 66l8 8M33 70l-4 10M53 73l5 8" stroke="#8A7A70" stroke-width="1"/>`;
+}
+
+const source=fs.readFileSync(assetsFile,"utf8");
+const sandbox={}; sandbox.window=sandbox; vm.createContext(sandbox); vm.runInContext(source,sandbox);
+const groups=sandbox.CAM.BIO_GROUPS;
+const labels=new Map(groups.flatMap(g=>g.items).filter(([id])=>!id.startsWith("preset:")).map(([id,label])=>[id,label]));
+const ids=[...labels.keys()];
+if(ids.length!==86) throw new Error(`Expected 86 Biology icons, found ${ids.length}`);
+const missing=ids.filter(id=>!icons[id]);
+const extra=Object.keys(icons).filter(id=>!labels.has(id));
+const missingMetadata=ids.filter(id=>!metadata[id]);
+const extraMetadata=Object.keys(metadata).filter(id=>!labels.has(id));
+if(missing.length||extra.length||missingMetadata.length||extraMetadata.length) throw new Error(`Registry mismatch. missing=${missing.join(",")} extra=${extra.join(",")} missingMetadata=${missingMetadata.join(",")} extraMetadata=${extraMetadata.join(",")}`);
+
+fs.mkdirSync(outDir,{recursive:true});
+fs.mkdirSync(legacyDir,{recursive:true});
+if(!fs.existsSync(path.join(backupDir,"assets.js"))) fs.copyFileSync(assetsFile,path.join(backupDir,"assets.js"));
+
+function doc(id,label,inner){
+ const safe=inner.replace(/__ID__/g,id.replace(/[^a-z0-9_-]/gi,"_"));
+ const note=metadata[id];
+ return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="title desc">\n  <title id="title">${esc(label)}</title>\n  <desc id="desc">${esc(note.description)} Biological basis: ${esc(note.biologicalBasis)}</desc>\n  <metadata>${esc(JSON.stringify({id,label,description:note.description,biologicalBasis:note.biologicalBasis}))}</metadata>\n  ${safe}\n</svg>\n`;
+}
+for(const id of ids){
+ fs.writeFileSync(path.join(outDir,`${id}.svg`),doc(id,labels.get(id),icons[id]));
+ const legacy=sandbox.CAM.ICONS[id];
+ fs.writeFileSync(path.join(legacyDir,`${id}.svg`),doc(id,`${labels.get(id)} (legacy)`,legacy));
+}
+
+const registry=`/* Generated by scripts/rebuild-biology-assets.js. Do not edit by hand. */\n(function(global){\n"use strict";\nvar BIOLOGY_ICONS=${JSON.stringify(icons,null,2)};\nvar BIOLOGY_METADATA=${JSON.stringify(metadata,null,2)};\nObject.keys(BIOLOGY_ICONS).forEach(function(id){ global.CAM.ICONS[id]=BIOLOGY_ICONS[id]; });\nglobal.CAM.BIOLOGY_METADATA=BIOLOGY_METADATA;\nglobal.CAM.BIOLOGY_ICON_SOURCE="app/assets/biology";\n})(window);\n`;
+fs.writeFileSync(path.join(root,"app","biology-assets.js"),registry);
+fs.writeFileSync(path.join(outDir,"manifest.json"),JSON.stringify({version:2,generated:"2026-08-04",style:"matte detailed scientific illustration; no specular highlights",count:ids.length,references,icons:ids.map(id=>({id,label:labels.get(id),file:`${id}.svg`,...metadata[id]}))},null,2)+"\n");
+const mdEsc=s=>String(s).replace(/\|/g,"\\|").replace(/\n/g," ");
+let evidence=`# Biology asset evidence guide\n\nVersion 2 · 86 non-preset SVG assets · matte detailed scientific illustration with no specular highlights.\n\n`;
+for(const group of groups){
+ const items=group.items.filter(([id])=>!id.startsWith("preset:"));
+ if(!items.length) continue;
+ evidence+=`## ${group.title}\n\n| Asset | Visual description | Biological basis |\n|---|---|---|\n`;
+ for(const [id,label] of items) evidence+=`| [${mdEsc(label)}](./${id}.svg) | ${mdEsc(metadata[id].description)} | ${mdEsc(metadata[id].biologicalBasis)} |\n`;
+ evidence+="\n";
+}
+evidence+="## Evidence references\n\n"+references.map(ref=>`- [${ref.title}](${ref.url}) — DOI ${ref.doi}; applies to: ${ref.appliesTo.join(", ")}`).join("\n")+"\n";
+fs.writeFileSync(path.join(outDir,"README.md"),evidence);
+console.log(`Generated ${ids.length} redesigned SVGs in ${path.relative(root,outDir)}`);
+console.log(`Backed up ${ids.length} legacy SVGs in ${path.relative(root,legacyDir)}`);
