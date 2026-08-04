@@ -232,7 +232,7 @@ input[type=range]{width:100%;accent-color:var(--accent);height:28px}
 .obj{cursor:move}
 .conn-hit{stroke:transparent;stroke-width:14;fill:none;cursor:pointer}
 body.cursor-none, body.cursor-none *{cursor:none !important}
-textarea.inline-editor{position:fixed;z-index:350;border:1.5px solid var(--accent);outline:none;background:rgba(255,255,255,.95);resize:none;overflow:hidden;border-radius:4px;box-shadow:var(--shadow);text-align:center}
+textarea.inline-editor{position:fixed;z-index:350;border:1.5px solid var(--accent);outline:none;background:transparent;resize:none;overflow:hidden;border-radius:3px;padding:1px 2px;margin:0;box-sizing:border-box;caret-color:var(--accent)}
 ::-webkit-scrollbar{width:10px;height:10px}
 ::-webkit-scrollbar-thumb{background:#D5D1C4;border-radius:6px;border:2px solid var(--panel)}
 ::-webkit-scrollbar-track{background:transparent}

@@ -12,9 +12,9 @@ A desktop editor for putting together biology and biomedical figures.
 
 </div>
 
-Fable Figures is a small desktop app for building scientific figures — the kind you'd
-otherwise put together in BioRender or Illustrator. You drag shapes, cell icons, arrows
-and text onto a canvas, arrange them, and export to PNG, SVG or PDF.
+Fable Figures is a small desktop app for building scientific figures — the kind that
+usually take a general‑purpose graphics editor to assemble. You drag shapes, cell icons,
+arrows and text onto a canvas, arrange them, and export to PNG, SVG or PDF.
 
 It's deliberately simple under the hood: the whole editor is plain JavaScript drawing an
 SVG document, with a thin Electron wrapper so it runs as a real desktop window (and can

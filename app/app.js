@@ -104,8 +104,7 @@ function objMarkup(o){
   if(o.type==="icon"){const f=colorFilter(o);return (f.def||"")+`<svg x="${x}" y="${y}" width="${w}" height="${h}" viewBox="0 0 100 100" opacity="${o.opacity}" style="color:${o.fill||'#3A3F45'}" ${f.ref}>${iconSVG(o.shapeKind,o.id)}</svg>`;}
   if(o.type==="image"){const f=colorFilter(o);const clip=o.radius?`clip-path="inset(0 round ${o.radius}px)"`:"";return (f.def||"")+`<image x="${x}" y="${y}" width="${w}" height="${h}" href="${o.href}" preserveAspectRatio="${o.fit==='contain'?'xMidYMid meet':'xMidYMid slice'}" opacity="${o.opacity}" ${clip} ${f.ref}/>`;}
   if(o.type==="text"){
-    // keep the text painted even while editing (the inline editor overlays it) so a
-    // text box is always visible — even if the overlay editor fails to appear.
+    if(o._editing)return "";   // hidden while the inline editor is open, so text isn't drawn twice
     const lines=String(o.text||"").split("\n"),lh=o.fontSize*1.25;
     const anchor=o.align==="center"?"middle":o.align==="right"?"end":"start";
     const tx=o.align==="center"?0:o.align==="right"?w/2:-w/2;
@@ -131,7 +130,7 @@ function groupBBox(objs){let mnx=1e9,mny=1e9,mxx=-1e9,mxy=-1e9,f=false;for(const
 function renderOverlay(){
   const z=state.view.zoom,hs=1.75/z,rs=1.5/z;let html="";const sel=selObjs();
   if(sel.length>1){const bb=groupBBox(sel);if(bb){for(const o of sel){if(o.type==="connector")continue;html+=`<rect x="${-o.w/2}" y="${-o.h/2}" width="${o.w}" height="${o.h}" transform="translate(${o.x},${o.y}) rotate(${o.rot||0})" fill="none" stroke="var(--accent)" stroke-width="${0.8/z}" opacity=".45"/>`;}html+=`<rect class="selbox" x="${bb.x}" y="${bb.y}" width="${bb.w}" height="${bb.h}" stroke-width="${1.5/z}" stroke-dasharray="${5/z} ${4/z}"/>`;const cs=[["g-nw",bb.x,bb.y],["g-ne",bb.x+bb.w,bb.y],["g-se",bb.x+bb.w,bb.y+bb.h],["g-sw",bb.x,bb.y+bb.h]];for(const c of cs)html+=`<rect class="handle" data-handle="${c[0]}" x="${c[1]-hs}" y="${c[2]-hs}" width="${hs*2}" height="${hs*2}" rx="${0.8/z}" stroke-width="${0.8/z}"/>`;const gmx=bb.x+bb.w/2;html+=`<line x1="${gmx}" y1="${bb.y}" x2="${gmx}" y2="${bb.y-24/z}" stroke="var(--accent)" stroke-width="${1.5/z}"/><circle class="rot-handle" data-handle="grot" cx="${gmx}" cy="${bb.y-24/z}" r="${rs}" stroke-width="${0.8/z}"/>`;overlay.innerHTML=html;return;}}
-  for(const o of sel){if(o.type==="connector"){html+=connectorSel(o,z);continue;}const w=o.w,h=o.h;html+=`<g transform="translate(${o.x},${o.y}) rotate(${o.rot||0})"><rect class="selbox" x="${-w/2}" y="${-h/2}" width="${w}" height="${h}" stroke-width="${1.5/z}"/>`;const cs=[["nw",-w/2,-h/2],["ne",w/2,-h/2],["se",w/2,h/2],["sw",-w/2,h/2],["n",0,-h/2],["e",w/2,0],["s",0,h/2],["w",-w/2,0]];for(const c of cs)html+=`<rect class="handle" data-handle="${c[0]}" data-id="${o.id}" x="${c[1]-hs}" y="${c[2]-hs}" width="${hs*2}" height="${hs*2}" rx="${0.8/z}" stroke-width="${0.8/z}"/>`;html+=`<line x1="0" y1="${-h/2}" x2="0" y2="${-h/2-22/z}" stroke="var(--accent)" stroke-width="${1.5/z}"/><circle class="rot-handle" data-handle="rot" data-id="${o.id}" cx="0" cy="${-h/2-22/z}" r="${rs}" stroke-width="${0.8/z}"/></g>`;}
+  for(const o of sel){if(o.type==="connector"){html+=connectorSel(o,z);continue;}const w=o.w,h=o.h,el=o.type==="shape"&&(o.shapeKind==="circle"||o.shapeKind==="ellipse"),d=0.7071;html+=`<g transform="translate(${o.x},${o.y}) rotate(${o.rot||0})">`+(el?`<ellipse class="selbox" cx="0" cy="0" rx="${w/2}" ry="${h/2}" stroke-width="${1.5/z}"/>`:`<rect class="selbox" x="${-w/2}" y="${-h/2}" width="${w}" height="${h}" stroke-width="${1.5/z}"/>`);const cs=el?[["nw",-w/2*d,-h/2*d],["ne",w/2*d,-h/2*d],["se",w/2*d,h/2*d],["sw",-w/2*d,h/2*d],["n",0,-h/2],["e",w/2,0],["s",0,h/2],["w",-w/2,0]]:[["nw",-w/2,-h/2],["ne",w/2,-h/2],["se",w/2,h/2],["sw",-w/2,h/2],["n",0,-h/2],["e",w/2,0],["s",0,h/2],["w",-w/2,0]];for(const c of cs)html+=`<rect class="handle" data-handle="${c[0]}" data-id="${o.id}" x="${c[1]-hs}" y="${c[2]-hs}" width="${hs*2}" height="${hs*2}" rx="${0.8/z}" stroke-width="${0.8/z}"/>`;html+=`<line x1="0" y1="${-h/2}" x2="0" y2="${-h/2-22/z}" stroke="var(--accent)" stroke-width="${1.5/z}"/><circle class="rot-handle" data-handle="rot" data-id="${o.id}" cx="0" cy="${-h/2-22/z}" r="${rs}" stroke-width="${0.8/z}"/></g>`;}
   overlay.innerHTML=html;
 }
 
@@ -285,22 +284,7 @@ function buildPreset(kind,cx,cy){
   else if(kind.indexOf("net:")===0) return buildNetwork(kind,cx,cy,O,C);
   return O;
 }
-/* Multi-object presets sourced from the user's OWN saved projects (read-only, never
-   modified). Save a project named e.g. "Preset-Network 1" and it becomes a preset. */
-function loadSavedNetwork(kind,cx,cy){
-  const n=kind==="net:saved1"?"1":"2";
-  const norm=s=>String(s||"").toLowerCase().replace(/[^a-z0-9]/g,"");
-  const ps=loadProjects();
-  const proj=ps.find(p=>norm(p.name)==="presetnetwork"+n)
-           ||ps.find(p=>/network/i.test(p.name)&&new RegExp("(^|[^0-9])"+n+"([^0-9]|$)").test(p.name));
-  if(!proj||!proj.data||!proj.data.objs||!proj.data.objs.length)return [];
-  const objs=cloneObjs(proj.data.objs);
-  const bb=groupBBox(objs);
-  if(bb){const dx=cx-(bb.x+bb.w/2),dy=cy-(bb.y+bb.h/2);for(const o of objs){if(o.type==="connector"){if(o.fromPt){o.fromPt.x+=dx;o.fromPt.y+=dy;}if(o.toPt){o.toPt.x+=dx;o.toPt.y+=dy;}continue;}o.x+=dx;o.y+=dy;if(o._points)o._points=o._points.split(" ").map(pp=>{const xy=pp.split(",");return (+xy[0]+dx)+","+(+xy[1]+dy);}).join(" ");}}
-  return objs;
-}
 function buildNetwork(kind,cx,cy,O,C){
-  if(kind==="net:saved1"||kind==="net:saved2")return loadSavedNetwork(kind,cx,cy);
   function layer(n,x,r,col){const ys=[];const gap=70;const top=cy-(n-1)*gap/2;for(let i=0;i<n;i++){const node=C(mkShape("circle",x,top+i*gap,r*2,r*2,col,"#5A5650",2));ys.push(node);}return ys;}
   if(kind==="net:mlp"){
     const L=[layer(3,cx-210,16,"#4FBEB2"),layer(4,cx-70,16,"#E0844C"),layer(4,cx+70,16,"#E0844C"),layer(2,cx+210,16,"#9A6CC0")];
@@ -335,12 +319,40 @@ function buildNetwork(kind,cx,cy,O,C){
     C(mkConn(tf[1].id,gn[1].id,{head:"triangle",stroke:"#3E9C5E",strokeWidth:2.5}));
     C(mkConn(tf[2].id,gn[0].id,{head:"line",stroke:"#D0402E",strokeWidth:2.5}));
     C(mkConn(tf[0].id,gn[2].id,{head:"line",stroke:"#D0402E",strokeWidth:2.5}));
+  }else if(kind==="net:rnn"){
+    const n=4,sp=118,x0=cx-(n-1)*sp/2,cells=[];
+    for(let i=0;i<n;i++){const x=x0+i*sp;
+      const inp=C(mkShape("circle",x,cy+72,30,30,"#5B9BD0","#3C6E9E",2));
+      const cell=C(mkShape("round",x,cy,88,58,"#4FBEB2","#2E8B82",2));cells.push(cell);
+      const out=C(mkShape("round",x,cy-72,70,34,"#E0844C","#B85A2E",2));
+      C(mkConn(inp.id,cell.id,{head:"triangle",strokeWidth:2}));
+      C(mkConn(cell.id,out.id,{head:"triangle",strokeWidth:2}));
+      C(mkText(x,cy,"h"+(i+1),13,"#0B3B36",70));
+      C(mkText(x,cy+72,"x"+(i+1),11,"#FFFFFF",40));
+      C(mkText(x,cy-72,"y"+(i+1),12,"#3A1E0E",60));
+    }
+    for(let i=0;i<n-1;i++)C(mkConn(cells[i].id,cells[i+1].id,{head:"triangle",strokeWidth:2.4,stroke:"#5A5650"}));
+    C(mkText(cx,cy+118,"Recurrent network (unrolled through time)",12,"#8C887D",320));
+  }else if(kind==="net:unet"){
+    const encX=cx-150,decX=cx+150,topY=cy-120,dy=64,ws=[72,60,50,40],hs=[64,52,42,34],enc=[],dec=[];
+    for(let i=0;i<4;i++){const y=topY+i*dy;
+      enc.push(C(mkShape("rect",encX,y,ws[i],hs[i],"#5B9BD0","#3A6E9E",2)));
+      dec.push(C(mkShape("rect",decX,y,ws[i],hs[i],"#4FBEB2","#2E8B82",2)));
+    }
+    const bott=C(mkShape("rect",cx,topY+4*dy,62,36,"#D97757","#B85A2E",2));
+    for(let i=0;i<3;i++)C(mkConn(enc[i].id,enc[i+1].id,{head:"triangle",strokeWidth:2,stroke:"#5A5650"}));
+    C(mkConn(enc[3].id,bott.id,{head:"triangle",strokeWidth:2,stroke:"#5A5650"}));
+    C(mkConn(bott.id,dec[3].id,{head:"triangle",strokeWidth:2,stroke:"#5A5650"}));
+    for(let i=3;i>0;i--)C(mkConn(dec[i].id,dec[i-1].id,{head:"triangle",strokeWidth:2,stroke:"#5A5650"}));
+    for(let i=0;i<4;i++)C(mkConn(enc[i].id,dec[i].id,{head:"triangle",strokeWidth:1.8,body:"dashed",stroke:"#B0ACA0"}));
+    C(mkText(encX,topY-32,"encoder",12,"#3A6E9E",90));C(mkText(decX,topY-32,"decoder",12,"#2E8B82",90));
+    C(mkText(cx,topY+4*dy+34,"U-Net (skip connections)",12,"#8C887D",200));
   }
   return O;
 }
 /* polyline support for line-graph preset */
 const _origShapePath=shapePath;
-function addPreset(kind,cx,cy){const objs=buildPreset(kind,cx,cy);if(!objs||!objs.length){if(kind==="net:saved1"||kind==="net:saved2")toast(T("noSavedNet").replace("%n%",kind.slice(-1)),true);return;}commitMany(objs);}
+function addPreset(kind,cx,cy){const objs=buildPreset(kind,cx,cy);if(!objs||!objs.length)return;commitMany(objs);}
 
 /* override objMarkup for special __poly shape used by line graphs */
 const _objMarkup=objMarkup;
@@ -429,15 +441,13 @@ function startEditText(o){
   if(activeEditor)return;
   o._editing=true;render();
   const z=state.view.zoom;
-  // position the editor over the actually-rendered text (robust across builds); fall back to CTM math
-  const g=objlayer.querySelector('.obj[data-id="'+o.id+'"]');
-  const rb=g&&g.getBoundingClientRect?g.getBoundingClientRect():null;
-  let left,top,width;
-  if(rb&&rb.width>1){left=rb.left-3;top=rb.top-3;width=Math.max(rb.width+18,60);}
-  else{let tl={x:80,y:80};try{const ctm=content.getScreenCTM();const p=stage.createSVGPoint();p.x=o.x-o.w/2;p.y=o.y-o.h/2;if(ctm)tl=p.matrixTransform(ctm);}catch(e){}left=tl.x;top=tl.y;width=Math.max(o.w*z,60);}
+  // place the editor exactly over the (now hidden) text box using canvas→screen coords
+  let left=80,top=80;
+  try{const ctm=content.getScreenCTM();if(ctm){const p=stage.createSVGPoint();p.x=o.x-o.w/2;p.y=o.y-o.h/2;const s=p.matrixTransform(ctm);left=s.x;top=s.y;}}catch(e){}
+  const width=Math.max(o.w*z,60);
   const fpx=Math.max(o.fontSize*z,11);
   const ta=document.createElement("textarea");ta.className="inline-editor";ta.value=o.text;ta.spellcheck=false;
-  Object.assign(ta.style,{left:left+"px",top:top+"px",width:width+"px",minHeight:(fpx*1.3)+"px",transformOrigin:"top left",transform:'rotate('+(o.rot||0)+'deg)',fontFamily:o.font||FONTS[0][0],fontSize:fpx+"px",fontWeight:o.weight,fontStyle:o.italic?"italic":"normal",textDecoration:o.underline?"underline":"none",color:o.fill,textAlign:o.align,lineHeight:1.25,padding:"2px"});
+  Object.assign(ta.style,{left:left+"px",top:top+"px",width:width+"px",minHeight:(fpx*1.3)+"px",transformOrigin:"top left",transform:'rotate('+(o.rot||0)+'deg)',fontFamily:o.font||FONTS[0][0],fontSize:fpx+"px",fontWeight:o.weight,fontStyle:o.italic?"italic":"normal",textDecoration:o.underline?"underline":"none",color:o.fill,textAlign:o.align,lineHeight:1.25});
   document.body.appendChild(ta);
   const openAt=Date.now();
   activeEditor={ta,o,pre:snapshot()};

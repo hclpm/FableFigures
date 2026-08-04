@@ -2,7 +2,7 @@
   "name": "fable-figures",
   "productName": "Fable Figures",
   "version": "2.0.0",
-  "description": "A BioRender-style visual canvas editor for biology & biomedical figures — Electron desktop app.",
+  "description": "A visual canvas editor for biology & biomedical figures — Electron desktop app.",
   "main": "main.js",
   "author": "Lee",
   "license": "MIT",
@@ -23,7 +23,6 @@
     "biomedical",
     "diagram",
     "editor",
-    "biorender",
     "canvas"
   ],
   "scripts": {
