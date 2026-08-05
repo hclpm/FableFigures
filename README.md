@@ -45,30 +45,37 @@ The name is a nod to how it was built: much of the app was written with Anthropi
 
 ## Getting started
 
-You'll need [Node.js](https://nodejs.org) 18 or newer.
+Grab the code first:
 
 ```bash
 git clone https://github.com/hclpm/fablefigures.git
 cd fablefigures
-npm install
-npm start
 ```
 
-`npm install` pulls in Electron (a one-time download); `npm start` opens the app window.
+Then pick whichever fits — no terminal needed for the first one:
 
-If you just want to poke at the UI, open `app/index.html` in a browser instead. Everything
-works except the parts that need the desktop shell (native save dialog, PDF export, the
-folder picker, and file-based storage).
+**Install it as an app (recommended).** Double-click **`Install Fable Figures.command`**.
+It installs dependencies, builds the app, and drops Fable Figures into your Applications
+folder; from then on you launch it like any other app — no terminal, no npm. The first time
+you open a `.command` file, macOS may need a right-click → Open to allow it. You'll need
+[Node.js](https://nodejs.org) 18 or newer installed for the build step; the script tells you
+if it's missing.
 
-## Building an app / installer
+**Run it from the terminal.** With Node.js installed:
 
-The easiest way, no terminal needed: double-click **`Install Fable Figures.command`**. It
-installs dependencies, builds the app, and drops it into your Applications folder — after
-that you launch Fable Figures like any other app. (Double-click **`Run Fable Figures (no
-install).command`** if you just want to try it without installing.) macOS may ask you to
-confirm the first time you open a `.command` file: right-click it → Open.
+```bash
+npm install    # one-time; pulls in Electron
+npm start      # opens the app window
+```
 
-To do it by hand, electron-builder is already configured:
+**Just peek at the UI.** Double-click **`Run Fable Figures (no install).command`**, or open
+`app/index.html` in a browser. Everything works except the parts that need the desktop shell
+(native save dialog, PDF export, the folder picker, and file-based storage).
+
+## Building a distributable
+
+`Install Fable Figures.command` already builds and installs on your own Mac. To produce
+installers you can hand to other people, electron-builder is configured for every platform:
 
 ```bash
 npm run dist:mac      # .dmg and .zip in release/
@@ -76,10 +83,10 @@ npm run dist:win      # NSIS installer and portable .exe
 npm run dist:linux    # AppImage
 ```
 
-The output in `release/` is a normal, double-clickable app — the person installing it
-doesn't need Node or this repo. Builds are unsigned, so on first launch macOS will warn
-about an unidentified developer (right-click → Open, or allow it under System Settings →
-Privacy & Security). Signing and notarizing needs an Apple Developer account.
+The output in `release/` is a normal, double-clickable app — whoever installs it doesn't
+need Node or this repo. Builds are unsigned, so on first launch macOS warns about an
+unidentified developer (right-click → Open, or allow it under System Settings → Privacy &
+Security). Signing and notarizing needs an Apple Developer account.
 
 ## A few things worth knowing
 
@@ -91,6 +98,8 @@ shape to connect them.
 ## Project layout
 
 ```
+Install Fable Figures.command           double-click: build + install to /Applications
+Run Fable Figures (no install).command  double-click: run without installing
 main.js        Electron main process (window, IPC handlers)
 preload.js     bridge to the renderer (save, PDF, folder picker, storage)
 package.json   metadata + electron-builder config
@@ -99,8 +108,10 @@ app/
   index.html   layout: home screen, editor, dialogs
   styles.css   styling (light/dark)
   assets.js    asset catalog + translations (exposed as window.CAM)
-  biology-assets.js  generated Biology icon overrides
-  assets/biology/    standalone redesigned Biology SVG source files
+  biology-assets.js  generated Biology icon overrides (from assets/biology/)
+  human-assets.js    generated Human "people" icon overrides (from assets/human/)
+  assets/biology/    standalone Biology SVG source files
+  assets/human/      standalone Human/people SVG source files
   app.js       the engine: state, rendering, connectors, presets, interaction
   app2.js      the UI: library, properties, export, projects, settings
 ```
@@ -112,10 +123,10 @@ the `I18N` map. Projects are stored in `localStorage` (or a folder you pick in S
 Internal identifiers still use the project's old codename, `camrender`, for storage
 compatibility; the app itself is Fable Figures.
 
-The 86 non-preset Biology icons are maintained as individual SVG files in
-`app/assets/biology/`. Run `node scripts/rebuild-biology-assets.js` after changing their
-generator to refresh both those files and the synchronous `app/biology-assets.js`
-registry used by the editor. The pre-redesign assets are preserved under `backups/`.
+The redesigned Biology and Human icons are kept as individual SVG files under `app/assets/`.
+After editing a generator, run `node scripts/rebuild-biology-assets.js` or
+`node scripts/rebuild-human-people-assets.js` to regenerate both the SVG files and the
+synchronous `app/biology-assets.js` / `app/human-assets.js` registries the editor loads.
 
 ## Data and privacy
 
