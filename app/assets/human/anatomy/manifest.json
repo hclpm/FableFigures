@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "generated": "2026-08-05",
+  "style": "detailed matte split-body medical illustration",
+  "icons": [
+    {
+      "id": "anatomy_female",
+      "label": "Female anatomy · Half-transparent",
+      "file": "anatomy_female.svg",
+      "size": [
+        82,
+        150
+      ],
+      "description": "Full-body anterior female anatomical mannequin divided at the median plane, with an intact external half and a transparent half exposing the brain, skeleton, major muscles, vessels, thoracoabdominal organs, urinary tract, uterus, ovary, and uterine tube.",
+      "designBasis": "A vertical split preserves the relationship between surface anatomy and internal position while sex-specific pelvic anatomy is shown without labels or explicit external detail."
+    },
+    {
+      "id": "anatomy_male",
+      "label": "Male anatomy · Half-transparent",
+      "file": "anatomy_male.svg",
+      "size": [
+        82,
+        150
+      ],
+      "description": "Full-body anterior male anatomical mannequin divided at the median plane, with an intact external half and a transparent half exposing the brain, skeleton, major muscles, vessels, thoracoabdominal organs, urinary tract, prostate, and simplified internal reproductive tract.",
+      "designBasis": "The shared pose and split direction support direct comparison with the female figure while retaining male pelvic anatomy and neutral publication-oriented presentation."
+    }
+  ]
+}

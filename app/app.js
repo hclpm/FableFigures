@@ -5,7 +5,7 @@
 const SVGNS="http://www.w3.org/2000/svg";
 const $=id=>document.getElementById(id);
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-const {ICONS,iconSVG,ICON_SIZES,BIO_GROUPS,HUMAN_GROUPS,SHAPES,ARROW_HEADS,ARROW_PRESETS,NETWORK_PRESETS,FONTS,ARTBOARDS,I18N}=window.CAM;
+const {ICONS,iconSVG,ICON_SIZES,ICON_VIEWBOXES,BIO_GROUPS,HUMAN_GROUPS,SHAPES,ARROW_HEADS,ARROW_PRESETS,NETWORK_PRESETS,FONTS,ARTBOARDS,I18N}=window.CAM;
 const RECOLOR=new Set(window.CAM.RECOLOR_ICONS||[]);
 const isElectron=!!(window.camrender&&window.camrender.isElectron);
 
@@ -101,7 +101,7 @@ function colorFilter(o){
 function objMarkup(o){
   const w=o.w,h=o.h,x=-w/2,y=-h/2;
   if(o.type==="shape"){const sh=o.shadow?`filter="url(#sh-${o.id})"`:"";return defsShadow(o)+shapePath(o.shapeKind,x,y,w,h,o.fill,o.stroke,o.strokeWidth,`${o.dash?`stroke-dasharray="${o.strokeWidth*2.4} ${o.strokeWidth*2}"`:""} ${sh} opacity="${o.opacity}"`);}
-  if(o.type==="icon"){const f=colorFilter(o);return (f.def||"")+`<svg x="${x}" y="${y}" width="${w}" height="${h}" viewBox="0 0 100 100" opacity="${o.opacity}" style="color:${o.fill||'#3A3F45'}" ${f.ref}>${iconSVG(o.shapeKind,o.id)}</svg>`;}
+  if(o.type==="icon"){const f=colorFilter(o),vb=ICON_VIEWBOXES[o.shapeKind]||"0 0 100 100";return (f.def||"")+`<svg x="${x}" y="${y}" width="${w}" height="${h}" viewBox="${vb}" opacity="${o.opacity}" style="color:${o.fill||'#3A3F45'}" ${f.ref}>${iconSVG(o.shapeKind,o.id)}</svg>`;}
   if(o.type==="image"){const f=colorFilter(o);const clip=o.radius?`clip-path="inset(0 round ${o.radius}px)"`:"";return (f.def||"")+`<image x="${x}" y="${y}" width="${w}" height="${h}" href="${o.href}" preserveAspectRatio="${o.fit==='contain'?'xMidYMid meet':'xMidYMid slice'}" opacity="${o.opacity}" ${clip} ${f.ref}/>`;}
   if(o.type==="text"){
     if(o._editing)return "";   // hidden while the inline editor is open, so text isn't drawn twice

@@ -147,6 +147,7 @@ var ICON_SIZES = {
   person:[62,118],personF:[62,118],patient:[62,118],doctor:[62,118],dna_person:[62,118],
   organ_brain:[118,114],organ_heart:[77,118],organ_lung:[101,118],organ_stomach:[99,118],organ_liver:[118,90],organ_pancreas:[118,75],organ_kidney:[86,118],organ_spleen:[80,118],organ_intestine:[106,118],organ_uterus:[118,90],organ_bladder:[100,118]
 };
+var ICON_VIEWBOXES = {};
 
 /* ===================== CATEGORY / LIBRARY STRUCTURE ===================== */
 /* Biology groups (icons + presets) */
@@ -160,10 +161,12 @@ var BIO_GROUPS = [
   {title:"Tissue · Stromal", items:[["muscle","Muscle cell"],["nerve","Nerve cell"],["cardiac","Cardiac cell"],["liver","Liver cells"],["fibroblast","Fibroblast"],["stromal","Stromal cell"],["adipocyte","Adipocyte"]]},
   {title:"Molecular", items:[["cell","Cell"],["nucleus","Nucleus"],["mitochondria","Mitochondrion"],["er","ER"],["golgi","Golgi"],["vesicle","Vesicle"],["dna","DNA"],["rna","RNA"],["protein","Protein"],["antibody","Antibody"],["virus","Virus"],["bacterium","Bacterium"]]},
   {title:"Data · Plots", items:[["umap","UMAP"],["volcano","Volcano"],["heatmap","Heatmap"],["barplot","Bar plot"],["boxplot","Box plot"],["violin","Violin"],["scatter","Scatter"],["lineplot","Line plot"],["piechart","Donut"],["facs","Flow cytometry"],["survival","Survival"],["network","Network"],["dendrogram","Dendrogram"],["westernblot","Western blot"]]},
-  {title:"Lab", items:[["sequencer","Sequencer"],["microscope","Microscope"],["flask","Flask"],["testtube","Test tube"],["petri","Petri dish"],["dish","Cell dish"],["microplate","96-well plate"],["pipette","Pipette"],["pcrtube","PCR tubes"],["centrifuge","Centrifuge"],["syringe","Syringe"],["vial","Vial"],["incubator","Incubator"],["freezer","-80 freezer"],["scale","Balance"],["computer","Workstation"],["database","Database"],["mouse","Mouse model"],["target","Target"],["pill","Drug"]]}
+  {title:"Lab", items:[["sequencer","Sequencer"],["microscope","Microscope"],["flask","Flask"],["testtube","Test tube"],["petri","Petri dish"],["dish","Cell dish"],["microplate","96-well plate"],["pipette","Pipette"],["pcrtube","PCR tubes"],["centrifuge","Centrifuge"],["syringe","Syringe"],["vial","Vial"],["incubator","Incubator"],["freezer","-80 freezer"],["scale","Balance"],["computer","Workstation"],["database","Database"],["target","Target"],["pill","Drug"]]},
+  {title:"Research animals", items:[["mouse","Mouse · White"],["mouse_black","Mouse · Black"],["mouse_agouti","Mouse · Agouti"],["mouse_gray","Mouse · Gray"],["mouse_cream","Mouse · Cream"],["rat","Rat · White"],["rat_black","Rat · Black"],["rat_agouti","Rat · Agouti"],["rat_gray","Rat · Gray"],["rat_cream","Rat · Cream"],["animal_pig","Miniature pig"],["animal_macaque","Rhesus macaque"],["animal_marmoset","Common marmoset"],["animal_fox","Red fox"],["animal_wolf","Gray wolf"],["animal_rabbit","Rabbit"],["animal_guinea_pig","Guinea pig"],["animal_hamster","Syrian hamster"],["animal_zebrafish","Zebrafish"],["animal_xenopus","Xenopus frog"],["animal_drosophila","Drosophila"],["animal_c_elegans","C. elegans"],["animal_chicken","Chicken"],["animal_sheep","Sheep"],["animal_goat","Goat"],["animal_cattle","Cattle"],["animal_dog","Beagle dog"],["animal_cat","Domestic cat"],["animal_ferret","Ferret"],["animal_horse","Horse"]]}
 ];
 var HUMAN_GROUPS = [
   {title:"People", items:[["person","Person"],["personF","Person (f)"],["patient","Patient"],["doctor","Clinician"],["dna_person","Genomic subject"]]},
+  {title:"Anatomy", items:[["anatomy_female","Female anatomy · Half-transparent"],["anatomy_male","Male anatomy · Half-transparent"]]},
   {title:"Cohort presets", items:[["preset:cohort","Cohort (10)"],["preset:casecontrol","Case / control"],["preset:trial","Trial arms"]]},
   {title:"Organs", items:[["organ_brain","Brain"],["organ_heart","Heart"],["organ_lung","Lungs"],["organ_stomach","Stomach"],["organ_liver","Liver"],["organ_pancreas","Pancreas"],["organ_kidney","Kidney"],["organ_spleen","Spleen"],["organ_intestine","Intestine"],["organ_uterus","Uterus"],["organ_bladder","Bladder"]]}
 ];
@@ -269,5 +272,5 @@ var I18N = {
   }
 };
 
-global.CAM = { ICONS, iconSVG, ICON_SIZES, BIO_GROUPS, HUMAN_GROUPS, SHAPES, ARROW_HEADS, ARROW_PRESETS, NETWORK_PRESETS, FONTS, ARTBOARDS, I18N, RECOLOR_ICONS, helpers:{cell,nuc,dots,grad,lgrad,trap,grid} };
+global.CAM = { ICONS, iconSVG, ICON_SIZES, ICON_VIEWBOXES, BIO_GROUPS, HUMAN_GROUPS, SHAPES, ARROW_HEADS, ARROW_PRESETS, NETWORK_PRESETS, FONTS, ARTBOARDS, I18N, RECOLOR_ICONS, helpers:{cell,nuc,dots,grad,lgrad,trap,grid} };
 })(window);

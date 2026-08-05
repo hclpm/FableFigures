@@ -29,7 +29,7 @@ function buildLibrary(filter){
     for(const g of BIO_GROUPS){const items=g.items.filter(it=>!filter||it[1].toLowerCase().includes(filter));if(!items.length)continue;h+=`<div class="libgroup-title">${g.title}</div><div class="libgrid">`;for(const it of items){const isP=it[0].indexOf("preset:")===0;h+=libCell(isP?"preset":"icon",it[0],it[1],(isP?`<div class="pbadge">SET</div>`+presetPreviewSVG(it[0]):`<svg viewBox="0 0 100 100">${iconSVG(it[0],"lib_"+it[0])}</svg>`),isP?"preset":"");}h+=`</div>`;}
     wrap.innerHTML=h||`<div class="uploads-hint">No matching assets.</div>`;
   }else if(curLib==="human"){
-    for(const g of HUMAN_GROUPS){const items=g.items.filter(it=>!filter||it[1].toLowerCase().includes(filter));if(!items.length)continue;h+=`<div class="libgroup-title">${g.title}</div><div class="libgrid">`;for(const it of items){const isP=it[0].indexOf("preset:")===0;h+=libCell(isP?"preset":"icon",it[0],it[1],(isP?`<div class="pbadge">SET</div>`+presetPreviewSVG(it[0]):`<svg viewBox="0 0 100 100">${iconSVG(it[0],"lib_"+it[0])}</svg>`),isP?"preset":"");}h+=`</div>`;}
+    for(const g of HUMAN_GROUPS){const items=g.items.filter(it=>!filter||it[1].toLowerCase().includes(filter));if(!items.length)continue;h+=`<div class="libgroup-title">${g.title}</div><div class="libgrid">`;for(const it of items){const isP=it[0].indexOf("preset:")===0,vb=window.CAM.ICON_VIEWBOXES[it[0]]||"0 0 100 100";h+=libCell(isP?"preset":"icon",it[0],it[1],(isP?`<div class="pbadge">SET</div>`+presetPreviewSVG(it[0]):`<svg viewBox="${vb}">${iconSVG(it[0],"lib_"+it[0])}</svg>`),isP?"preset":"");}h+=`</div>`;}
     wrap.innerHTML=h;
   }else if(curLib==="ai"){buildAIPane(wrap);}
   else if(curLib==="uploads"){buildUploads(wrap);}

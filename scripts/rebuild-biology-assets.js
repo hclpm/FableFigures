@@ -6,7 +6,8 @@
  * synchronous browser registry consumed by Fable Figures.  The drawings use
  * a shared matte scientific-illustration language: warm pastel gradients,
  * restrained outlines, small highlight planes, and biologically identifying
- * internal detail.  No raster data is embedded.
+ * internal detail. Reference-preserving image conversions may be linked as
+ * transparent raster layers inside the generated SVG wrapper.
  */
 const fs = require("fs");
 const path = require("path");
@@ -144,8 +145,51 @@ function plot(kind){
 }
 ["umap","volcano","heatmap","barplot","boxplot","violin","scatter","lineplot","piechart","facs","survival","network","dendrogram","westernblot"].forEach(k=>icons[k]=plot(k));
 
+const realisticAnimalFiles={
+ mouse:"mouse-white.png",
+ mouse_black:"mouse-black.png",
+ mouse_agouti:"mouse-agouti.png",
+ mouse_gray:"mouse-gray.png",
+ mouse_cream:"mouse-cream.png",
+ rat:"rat-white.png",
+ rat_black:"rat-black.png",
+ rat_agouti:"rat-agouti.png",
+ rat_gray:"rat-gray.png",
+ rat_cream:"rat-cream.png",
+ animal_pig:"animal-pig.png",
+ animal_macaque:"animal-macaque.png",
+ animal_marmoset:"animal-marmoset.png",
+ animal_fox:"animal-fox.png",
+ animal_wolf:"animal-wolf.png",
+ animal_rabbit:"animal-rabbit.png",
+ animal_guinea_pig:"animal-guinea-pig.png",
+ animal_hamster:"animal-hamster.png",
+ animal_zebrafish:"animal-zebrafish.png",
+ animal_xenopus:"animal-xenopus.png",
+ animal_drosophila:"animal-drosophila.png",
+ animal_c_elegans:"animal-c-elegans.png",
+ animal_chicken:"animal-chicken.png",
+ animal_sheep:"animal-sheep.png",
+ animal_goat:"animal-goat.png",
+ animal_cattle:"animal-cattle.png",
+ animal_dog:"animal-dog.png",
+ animal_cat:"animal-cat.png",
+ animal_ferret:"animal-ferret.png",
+ animal_horse:"animal-horse.png"
+};
+
+function realisticAnimal(kind){
+ const file=realisticAnimalFiles[kind];
+ if(!file) throw new Error(`Unknown research-animal raster: ${kind}`);
+ const rasterPath=path.join(root,"app","assets","biology","raster",file);
+ if(!fs.existsSync(rasterPath)) throw new Error(`Missing research-animal raster for ${kind}: ${rasterPath}`);
+ const raster=fs.readFileSync(rasterPath).toString("base64");
+ return `<image x="1" y="1" width="98" height="98" preserveAspectRatio="xMidYMid meet" href="data:image/png;base64,${raster}"/>`;
+}
+
 function lab(kind){
  const dark="#43535C",line="#63747C",body="#D7E1E4",body2="#B8C9CE",blue="#6F9FB7",teal="#69A6A2",pink="#D9827C",red="#C55F59",yellow="#DDAE55",green="#73A06A",glass="#E7F4F6";
+ if(realisticAnimalFiles[kind]) return realisticAnimal(kind);
  if(kind==="sequencer") return `<path d="M13 25q0-7 7-7h60q7 0 7 7v54q0 6-6 6H19q-6 0-6-6z" fill="${body}" stroke="${dark}" stroke-width="2"/><path d="M14 51h72M59 19v32" stroke="#9BABB0" stroke-width="1.1"/><rect x="21" y="26" width="31" height="19" rx="2.5" fill="#233C47" stroke="#536B75"/><path d="M25 40l6-7 6 4 5-6 6 3" fill="none" stroke="#70D0CE" stroke-width="1.7"/><path d="M25 42h23M25 29v13" stroke="#6C7E86" stroke-width=".7"/><rect x="64" y="27" width="15" height="17" rx="2.5" fill="#EEF3F3" stroke="#87999F"/><rect x="67" y="31" width="9" height="6" rx="1" fill="${pink}"/><path d="M21 58h35v18H21z" fill="#BBC9CD" stroke="#75868D" stroke-width="1.2"/><path d="M25 62h27M25 67h27M25 72h27" stroke="#E9F0F1" stroke-width="1"/><path d="M63 60h15M63 64h15M63 68h15" stroke="#7D8E95" stroke-width="1.2"/><circle cx="66" cy="76" r="2.5" fill="${green}"/><circle cx="74" cy="76" r="2.5" fill="${yellow}"/><path d="M22 85v3M78 85v3" stroke="${dark}" stroke-width="2"/>`;
  if(kind==="microscope") return `<g stroke="${dark}" stroke-linejoin="round"><path d="M31 11h14l2 8-13 2z" fill="#C5D2D6" stroke-width="1.7"/><path d="M47 12h14l-1 9-13-2z" fill="#C5D2D6" stroke-width="1.7"/><path d="M35 22q13 9 29 1l5 12q-18 10-35 0z" fill="${body}" stroke-width="2"/><path d="M62 33q17 12 12 32-2 9-10 14" fill="none" stroke-width="7" stroke-linecap="round"/><path d="M40 34h24l-2 8H42z" fill="#9CADB3" stroke-width="1.5"/><ellipse cx="51" cy="42" rx="10" ry="4" fill="#788A91" stroke-width="1.3"/><path d="M45 44l-3 13M51 45v14M57 44l4 12" stroke-width="3" stroke-linecap="round"/><path d="M22 59h48v7H22z" fill="#91A4AA" stroke-width="1.8"/><rect x="31" y="57" width="23" height="3" rx="1" fill="#EAF3F4" stroke-width=".8"/><path d="M45 66v8" stroke-width="3"/><ellipse cx="45" cy="75" rx="8" ry="3" fill="#DCE5E7" stroke-width="1.2"/><path d="M24 83q18-12 45-5l9 9H20z" fill="#AEBFC4" stroke-width="2"/></g><circle cx="70" cy="52" r="6" fill="#D8E2E4" stroke="${dark}" stroke-width="1.6"/><circle cx="70" cy="52" r="2" fill="#6C7C82"/><circle cx="28" cy="86" r="3" fill="#EDF3F3" stroke="${dark}"/><path d="M42 54h6" stroke="${yellow}" stroke-width="2"/>`;
  if(kind==="flask") return `<path d="M38 11h24v8l-4 2v22l27 36q5 8-6 8H21q-11 0-6-8l27-36V21l-4-2z" fill="${glass}" fill-opacity=".72" stroke="#5E8795" stroke-width="2.2" stroke-linejoin="round"/><path d="M39 13h22M42 22h16" stroke="#5E8795" stroke-width="2"/><path d="M23 67q27-8 54 0l10 16H13z" fill="${pink}" fill-opacity=".78"/><path d="M22 67q28-8 56 0" fill="none" stroke="#A95655" stroke-width="1.3"/><path d="M34 55h8M31 62h11M29 70h13M66 55h7M67 62h9M68 70h11" stroke="#6D939F" stroke-width="1"/><circle cx="44" cy="73" r="2.1" fill="#F3C0B2"/><circle cx="58" cy="78" r="1.7" fill="#F3C0B2"/><circle cx="63" cy="69" r="1.3" fill="#F3C0B2"/>`;
@@ -163,11 +207,10 @@ function lab(kind){
  if(kind==="scale") return `<rect x="17" y="52" width="66" height="34" rx="6" fill="#BACBD0" stroke="${dark}" stroke-width="2"/><path d="M25 18h50v36H25z" fill="#E8F2F3" fill-opacity=".5" stroke="#687F89" stroke-width="1.7"/><path d="M31 18v36M69 18v36M25 27h50" stroke="#9CB2B9" stroke-width="1"/><path d="M50 52V39" stroke="${dark}" stroke-width="2"/><ellipse cx="50" cy="38" rx="19" ry="5" fill="#D5DFE1" stroke="${dark}" stroke-width="1.5"/><ellipse cx="50" cy="37" rx="13" ry="3" fill="#F0F4F3" stroke="#8B9BA0" stroke-width=".8"/><rect x="29" y="62" width="28" height="11" rx="2" fill="#263D47"/><text x="43" y="69.5" text-anchor="middle" font-family="sans-serif" font-size="6" fill="#72D1CC">0.0000 g</text><circle cx="66" cy="67" r="3" fill="${green}"/><circle cx="75" cy="67" r="2.3" fill="${yellow}"/><path d="M23 86v4M77 86v4" stroke="${dark}" stroke-width="2"/>`;
  if(kind==="computer") return `<rect x="9" y="11" width="67" height="49" rx="4" fill="${body}" stroke="${dark}" stroke-width="2"/><rect x="15" y="17" width="55" height="36" fill="#203943" stroke="#63747C"/><path d="M20 46l8-9 8 5 8-15 8 10 12-13" fill="none" stroke="#69D0CD" stroke-width="1.7"/>${circles([[23,26],[34,32],[49,24],[61,43]],pink,1.7)}<path d="M38 60v8M48 60v8M30 69h26" stroke="${dark}" stroke-width="3"/><path d="M19 76h50l7 8H10z" fill="#CED9DC" stroke="${dark}" stroke-width="1.5"/>${Array.from({length:15},(_,i)=>`<rect x="${17+(i%5)*9}" y="${78+Math.floor(i/5)*2}" width="6" height="1" rx=".5" fill="#75878E"/>`).join("")}<rect x="80" y="22" width="13" height="52" rx="2" fill="#43545D" stroke="#2F3B41" stroke-width="1.4"/><circle cx="86.5" cy="67" r="1.8" fill="${green}"/><path d="M83 29h7M83 34h7M83 39h7" stroke="#8EA1A8"/><ellipse cx="84" cy="83" rx="6" ry="3.5" fill="#C7D3D6" stroke="${dark}" stroke-width="1"/><path d="M84 80v3" stroke="${dark}"/>`;
  if(kind==="database") return `<path d="M25 22q25-13 50 0v54q-25 13-50 0z" fill="${blue}" stroke="#4C7285" stroke-width="2"/><ellipse cx="50" cy="22" rx="25" ry="10" fill="#A8CBD8" stroke="#4C7285" stroke-width="1.7"/><path d="M25 38q25 13 50 0M25 54q25 13 50 0M25 70q25 13 50 0" fill="none" stroke="#DCECF0" stroke-width="1.5"/><g fill="#EAF4F5" font-family="monospace" font-size="5"><text x="37" y="35">001101</text><text x="38" y="51">110010</text><text x="37" y="67">010111</text></g><path d="M12 33h10M17 28l-5 5 5 5M78 65h10M83 60l5 5-5 5" fill="none" stroke="${dark}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="67" cy="78" r="2" fill="${green}"/><circle cx="60" cy="80" r="1.5" fill="${yellow}"/>`;
- if(kind==="mouse") return `<path d="M62 83c12 2 23 1 36 2" fill="none" stroke="#B77D75" stroke-width="4.6" stroke-linecap="round"/><path d="M62 83c12 2 23 1 36 2" fill="none" stroke="#E2AAA3" stroke-width="2.5" stroke-linecap="round"/><path d="M37 28c-8 6-12 17-13 31-1 18 5 31 19 35 13 4 26-1 30-13 4-14-2-34-10-44-7-9-18-13-26-9z" fill="#E5E2DC" stroke="#8C817A" stroke-width="1.7"/><path d="M32 54c-5 13-3 29 8 36 7 5 18 5 25 0-14 3-25-3-33-36z" fill="#F2F0EC"/><path d="M34 15c5-7 15-10 23-5 7 4 9 12 7 20-2 7-9 12-17 13-8 0-15-4-18-11-3-6 0-13 5-17z" fill="#EEECE8" stroke="#8C817A" stroke-width="1.6"/><path d="M57 17q8 1 12 7-1 6-7 9l-8-5z" fill="#EEECE8" stroke="#8C817A" stroke-width="1.3"/><path d="M32 16q-6-8-11-1-2 7 5 12" fill="#D7A09A" stroke="#8C817A" stroke-width="1.3"/><path d="M24 17q1-5 5-2l3 7" fill="#E9BBB5"/><path d="M56 13q5-6 9-1 3 6-2 11" fill="#D7A09A" stroke="#8C817A" stroke-width="1.2"/><path d="M58 14q3-3 5 0l1 6" fill="#E9BBB5"/><ellipse cx="50" cy="19" rx="2.3" ry="2.6" fill="#302827"/><circle cx="49.4" cy="18.2" r=".7" fill="#F7F4EF"/><path d="M67 24q5 1 4 4-2 4-7 2" fill="#DEA09C" stroke="#9A6967" stroke-width=".8"/><circle cx="68.5" cy="26.5" r=".7" fill="#A76162"/><path d="M66 27l16-3M66 29l17 2M65 31l14 6" stroke="#948984" stroke-width=".65"/><path d="M34 31q8 5 20 3M29 39q7 4 12 3" fill="none" stroke="#C5BDB7" stroke-width=".8"/><path d="M38 49q-5 3-5 13l5 5q5-3 6-10l-1-7" fill="#ECE9E4" stroke="#9B8F88" stroke-width="1"/><path d="M58 48q5 4 4 13l-5 6q-5-3-6-10l2-8" fill="#ECE9E4" stroke="#9B8F88" stroke-width="1"/><path d="M36 62q1 5 4 7M39 61q2 5 4 6M60 61q-1 5-4 7M57 61q-2 5-4 6" fill="none" stroke="#D99491" stroke-width="1.5" stroke-linecap="round"/><path d="M28 80q-7 4-14 7-5 2-2 5h20q5-2 5-7" fill="#D8D4CE" stroke="#8C817A" stroke-width="1.2"/><path d="M17 88q-8 0-13 3M20 90H7M24 90l-8 3" stroke="#C28680" stroke-width=".8"/><path d="M58 85q-5 4-2 8h18q4-2-1-5l-7-2" fill="#E0DDD7" stroke="#8C817A" stroke-width="1.2"/><path d="M57 91q7 2 15 1M60 88l-2 5M64 88l-1 5" stroke="#C28680" stroke-width=".8"/><path d="M31 71q13 7 29 1" fill="none" stroke="#D4CFC9" stroke-width="1"/>`;
  if(kind==="target") return `<path d="M13 58c-1-13 9-20 18-23 1-12 15-19 25-12 9-5 21 2 20 12 13 3 17 16 9 25 4 12-9 23-20 18-8 9-22 6-26-4-11 6-25-3-26-16z" fill="#9A79B2" stroke="#654D7D" stroke-width="2"/><path d="M27 42q8-8 16 0t16 0 17 1M24 63q9-9 18-1t17-1 18 0" fill="none" stroke="#BDA9CD" stroke-width="2.3"/><path d="M44 39c8-7 20-2 19 7-1 7-8 8-12 13-3 4-2 9-7 12-8-4-10-14-4-20 3-3 2-8 4-12z" fill="#E8DDED" stroke="#654D7D" stroke-width="1.4"/><g stroke="#7F6238" stroke-width="1.2"><path d="M47 51l7-5 7 4-2 8-8 1z" fill="${yellow}"/><circle cx="47" cy="51" r="2.5" fill="${pink}"/><circle cx="61" cy="50" r="2.5" fill="#6EA0B7"/><circle cx="51" cy="59" r="2.3" fill="${green}"/></g><path d="M47 51L35 45M61 50l12-7M51 59l-2 13" stroke="#D5B35B" stroke-width="1" stroke-dasharray="2 2"/><circle cx="35" cy="45" r="2" fill="#E4C36F"/><circle cx="73" cy="43" r="2" fill="#E4C36F"/>`;
  return `<g transform="rotate(24 50 50)"><rect x="14" y="33" width="72" height="34" rx="17" fill="#E9EEF0" stroke="#8F6667" stroke-width="2"/><path d="M14 50q0-17 17-17h20v34H31Q14 67 14 50z" fill="${pink}"/><path d="M51 34h17q17 0 17 16T68 66H51z" fill="${blue}" fill-opacity=".72"/><path d="M51 34v32" stroke="#7E6668" stroke-width="1.6"/><path d="M58 40h14M58 44h10" stroke="#EAF4F5" stroke-width="1"/><text x="27" y="53" font-family="sans-serif" font-size="7" font-weight="600" fill="#F7E9E5">25 mg</text>${[[59,52,2.2,"#E6B75E"],[66,56,1.8,"#D77F7A"],[73,49,2,"#79A56A"],[62,60,1.4,"#9B79B2"]].map(([x,y,r,c])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${c}" stroke="#765F60" stroke-width=".5"/>`).join("")}<path d="M18 41q9-8 19-5M57 37q12-4 20 3" fill="none" stroke="#F5F7F7" stroke-width="1" opacity=".65"/></g>`;
 }
-["sequencer","microscope","flask","testtube","petri","dish","microplate","pipette","pcrtube","centrifuge","syringe","vial","incubator","freezer","scale","computer","database","mouse","target","pill"].forEach(k=>icons[k]=lab(k));
+["sequencer","microscope","flask","testtube","petri","dish","microplate","pipette","pcrtube","centrifuge","syringe","vial","incubator","freezer","scale","computer","database","target","pill",...Object.keys(realisticAnimalFiles)].forEach(k=>icons[k]=lab(k));
 
 /* Fine biological/technical structure layered onto the readable silhouettes. */
 function detailOverlay(id){
@@ -222,14 +265,14 @@ for(const id of plotIds){
  if(id==="westernblot") icons[id]+=`<text x="11" y="20" font-size="5" font-family="sans-serif" fill="#555">kDa</text><text x="24" y="91" font-size="5" font-family="sans-serif" fill="#555">C</text><text x="42" y="91" font-size="5" font-family="sans-serif" fill="#555">T1</text><text x="61" y="91" font-size="5" font-family="sans-serif" fill="#555">T2</text>`;
 }
 
-const labIds=new Set(["sequencer","microscope","flask","testtube","petri","dish","microplate","pipette","pcrtube","centrifuge","syringe","vial","incubator","freezer","scale","computer","database","mouse","target","pill"]);
+const labIds=new Set(["sequencer","microscope","flask","testtube","petri","dish","microplate","pipette","pcrtube","centrifuge","syringe","vial","incubator","freezer","scale","computer","database","target","pill",...Object.keys(realisticAnimalFiles)]);
 
 const source=fs.readFileSync(assetsFile,"utf8");
 const sandbox={}; sandbox.window=sandbox; vm.createContext(sandbox); vm.runInContext(source,sandbox);
 const groups=sandbox.CAM.BIO_GROUPS;
 const labels=new Map(groups.flatMap(g=>g.items).filter(([id])=>!id.startsWith("preset:")).map(([id,label])=>[id,label]));
 const ids=[...labels.keys()];
-if(ids.length!==86) throw new Error(`Expected 86 Biology icons, found ${ids.length}`);
+if(ids.length!==115) throw new Error(`Expected 115 Biology icons, found ${ids.length}`);
 const missing=ids.filter(id=>!icons[id]);
 const extra=Object.keys(icons).filter(id=>!labels.has(id));
 const missingMetadata=ids.filter(id=>!metadata[id]);
@@ -258,15 +301,16 @@ function doc(id,label,inner){
 }
 for(const id of ids){
  fs.writeFileSync(path.join(outDir,`${id}.svg`),doc(id,labels.get(id),icons[id]));
- const legacy=sandbox.CAM.ICONS[id];
+ const legacy=sandbox.CAM.ICONS[id]||(realisticAnimalFiles[id]?sandbox.CAM.ICONS.mouse:null);
+ if(!legacy) throw new Error(`Missing legacy icon for ${id}`);
  fs.writeFileSync(path.join(legacyDir,`${id}.svg`),doc(id,`${labels.get(id)} (legacy)`,legacy));
 }
 
 const registry=`/* Generated by scripts/rebuild-biology-assets.js. Do not edit by hand. */\n(function(global){\n"use strict";\nvar BIOLOGY_ICONS=${JSON.stringify(icons,null,2)};\nvar BIOLOGY_METADATA=${JSON.stringify(metadata,null,2)};\nObject.keys(BIOLOGY_ICONS).forEach(function(id){ global.CAM.ICONS[id]=BIOLOGY_ICONS[id]; });\nglobal.CAM.BIOLOGY_METADATA=BIOLOGY_METADATA;\nglobal.CAM.BIOLOGY_ICON_SOURCE="app/assets/biology";\n})(window);\n`;
 fs.writeFileSync(path.join(root,"app","biology-assets.js"),registry);
-fs.writeFileSync(path.join(outDir,"manifest.json"),JSON.stringify({version:2,generated:"2026-08-04",style:"matte detailed scientific illustration; no specular highlights",count:ids.length,references,icons:ids.map(id=>({id,label:labels.get(id),file:`${id}.svg`,...metadata[id]}))},null,2)+"\n");
+fs.writeFileSync(path.join(outDir,"manifest.json"),JSON.stringify({version:2,generated:"2026-08-05",style:"matte detailed scientific illustration; no specular highlights",count:ids.length,references,icons:ids.map(id=>({id,label:labels.get(id),file:`${id}.svg`,...metadata[id]}))},null,2)+"\n");
 const mdEsc=s=>String(s).replace(/\|/g,"\\|").replace(/\n/g," ");
-let evidence=`# Biology asset evidence guide\n\nVersion 2 · 86 non-preset SVG assets · matte detailed scientific illustration with no specular highlights.\n\n`;
+let evidence=`# Biology asset evidence guide\n\nVersion 2 · ${ids.length} non-preset SVG assets · matte detailed scientific illustration with no specular highlights.\n\n`;
 for(const group of groups){
  const items=group.items.filter(([id])=>!id.startsWith("preset:"));
  if(!items.length) continue;
