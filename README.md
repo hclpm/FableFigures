@@ -62,7 +62,13 @@ folder picker, and file-based storage).
 
 ## Building an app / installer
 
-electron-builder is already configured:
+The easiest way, no terminal needed: double-click **`Install Fable Figures.command`**. It
+installs dependencies, builds the app, and drops it into your Applications folder — after
+that you launch Fable Figures like any other app. (Double-click **`Run Fable Figures (no
+install).command`** if you just want to try it without installing.) macOS may ask you to
+confirm the first time you open a `.command` file: right-click it → Open.
+
+To do it by hand, electron-builder is already configured:
 
 ```bash
 npm run dist:mac      # .dmg and .zip in release/
