@@ -56,8 +56,9 @@ Then pick whichever fits — no terminal needed for the first one:
 
 **Install it as an app (recommended).** Double-click **`Install Fable Figures.command`**.
 It installs dependencies, builds the app, and drops Fable Figures into your Applications
-folder; from then on you launch it like any other app — no terminal, no npm. The first time
-you open a `.command` file, macOS may need a right-click → Open to allow it. You'll need
+folder; from then on you launch it like any other app — no terminal, no npm. (To remove it
+later, double-click **`Uninstall Fable Figures.command`**.) The first time you open a
+`.command` file, macOS may need a right-click → Open to allow it. You'll need
 [Node.js](https://nodejs.org) 18 or newer installed for the build step; the script tells you
 if it's missing.
 
@@ -99,6 +100,7 @@ shape to connect them.
 
 ```
 Install Fable Figures.command           double-click: build + install to /Applications
+Uninstall Fable Figures.command         double-click: remove the app from /Applications
 Run Fable Figures (no install).command  double-click: run without installing
 main.js        Electron main process (window, IPC handlers)
 preload.js     bridge to the renderer (save, PDF, folder picker, storage)
@@ -109,9 +111,10 @@ app/
   styles.css   styling (light/dark)
   assets.js    asset catalog + translations (exposed as window.CAM)
   biology-assets.js  generated Biology icon overrides (from assets/biology/)
-  human-assets.js    generated Human "people" icon overrides (from assets/human/)
-  assets/biology/    standalone Biology SVG source files
-  assets/human/      standalone Human/people SVG source files
+  human-assets.js    generated Human "people" icon overrides (from assets/human/people/)
+  human-anatomy-assets.js  generated full-body anatomy icon overrides
+  assets/biology/    standalone Biology SVG source files (cells, lab, research animals)
+  assets/human/      standalone Human SVG source files (people, anatomy)
   app.js       the engine: state, rendering, connectors, presets, interaction
   app2.js      the UI: library, properties, export, projects, settings
 ```
@@ -124,9 +127,10 @@ Internal identifiers still use the project's old codename, `camrender`, for stor
 compatibility; the app itself is Fable Figures.
 
 The redesigned Biology and Human icons are kept as individual SVG files under `app/assets/`.
-After editing a generator, run `node scripts/rebuild-biology-assets.js` or
-`node scripts/rebuild-human-people-assets.js` to regenerate both the SVG files and the
-synchronous `app/biology-assets.js` / `app/human-assets.js` registries the editor loads.
+After editing a generator, run the matching rebuild script —
+`node scripts/rebuild-biology-assets.js`, `rebuild-human-people-assets.js`, or
+`rebuild-human-anatomy-assets.js` — to regenerate both the SVG files and the synchronous
+`biology-assets.js` / `human-assets.js` / `human-anatomy-assets.js` registries the editor loads.
 
 ## Data and privacy
 
