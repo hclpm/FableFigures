@@ -21,6 +21,10 @@ SVG document, with a thin Electron wrapper so it runs as a real desktop window (
 use native save/PDF dialogs). There's no bundler and no build step for the UI — you can
 open `app/index.html` in a browser and it just works.
 
+<p align="center">
+  <img src="docs/screenshot.png" width="840" alt="The Fable Figures editor: a canvas titled Fable Figures with lab equipment, a research mouse, organs, cells, and a neural-network diagram, alongside the shape library and the properties panel.">
+</p>
+
 ## Why "Fable Figures"?
 
 The name is a nod to how it was built: much of the app was written with Anthropic's Claude
