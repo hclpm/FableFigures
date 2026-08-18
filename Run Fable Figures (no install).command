@@ -14,5 +14,12 @@ if [ ! -d node_modules ]; then
   npm install || { echo "npm install failed."; read -n 1 -s -r -p "Press any key to close."; exit 1; }
 fi
 
+# npm sometimes skips Electron's binary download; make sure it actually landed.
+if ! node -e "require('electron')" >/dev/null 2>&1; then
+  echo "Electron binary didn't download — repairing…"
+  rm -rf node_modules/electron
+  npm install electron@^30.5.1 --foreground-scripts || { echo "Couldn't install Electron. Check your internet connection (github.com must be reachable) and try again."; read -n 1 -s -r -p "Press any key to close."; exit 1; }
+fi
+
 echo "Launching Fable Figures…"
 npm start

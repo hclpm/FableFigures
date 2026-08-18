@@ -19,6 +19,13 @@ echo
 echo "[1/3] Installing dependencies (first run only)…"
 npm install || { echo; echo "npm install failed. Check your internet connection and try again."; read -n 1 -s -r -p "Press any key to close."; exit 1; }
 
+# npm sometimes skips Electron's binary download; make sure it actually landed.
+if ! node -e "require('electron')" >/dev/null 2>&1; then
+  echo "Electron binary didn't download — repairing…"
+  rm -rf node_modules/electron
+  npm install electron@^30.5.1 --foreground-scripts || { echo; echo "Couldn't install Electron. Check your internet connection (github.com must be reachable) and try again."; read -n 1 -s -r -p "Press any key to close."; exit 1; }
+fi
+
 echo
 echo "[2/3] Building the desktop app… this can take a few minutes."
 npm run dist:mac || { echo; echo "Build failed. See the messages above."; read -n 1 -s -r -p "Press any key to close."; exit 1; }
