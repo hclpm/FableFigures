@@ -12,11 +12,13 @@ const isElectron=!!(window.camrender&&window.camrender.isElectron);
 /* ---------------- persistence ---------------- */
 const LS_PROJ="camrender.projects", LS_SET="camrender.settings";
 let projectsCache=null;   // when a project folder is set (file mode), projects live here
-function fileMode(){return !!(isElectron&&window.camrender&&window.camrender.libWrite&&settings&&settings.projectDir);}
-function libFile(){return settings.projectDir.replace(/[\\/]+$/,"")+"/fable-figures-library.json";}
+// Working-folder mode: every *.svg in settings.projectDir is a project (see folder* helpers in app2.js).
+function fileMode(){return !!(isElectron&&window.camrender&&window.camrender.libWrite&&window.camrender.listSvgs&&settings&&settings.projectDir);}
+function folderDir(){return settings.projectDir.replace(/[\\/]+$/,"");}
+function libFile(){return folderDir()+"/fable-figures-library.json";}   // legacy single-file library (migrated to SVGs)
 function loadProjects(){if(fileMode())return projectsCache||[];try{return JSON.parse(localStorage.getItem(LS_PROJ)||"[]");}catch{return[];}}
-function saveProjects(p){if(fileMode()){projectsCache=p;try{window.camrender.libWrite({file:libFile(),data:JSON.stringify(p)});}catch(e){}}else localStorage.setItem(LS_PROJ,JSON.stringify(p));}
-async function refreshProjectsCache(){if(!fileMode()){projectsCache=null;return;}try{const txt=await window.camrender.libRead(libFile());projectsCache=txt?JSON.parse(txt):[];}catch(e){projectsCache=[];}}
+function saveProjects(p){if(fileMode()){projectsCache=p;}else localStorage.setItem(LS_PROJ,JSON.stringify(p));}
+async function refreshProjectsCache(){if(!fileMode()){projectsCache=null;return;}try{await folderRefresh();}catch(e){projectsCache=projectsCache||[];}}
 function loadSettings(){const def={lang:"en",appearance:"light",theme:"ivory",artboard:"slide",autosave:true,projectDir:""};try{return Object.assign(def,JSON.parse(localStorage.getItem(LS_SET)||"{}"));}catch{return def;}}
 function saveSettings(){localStorage.setItem(LS_SET,JSON.stringify(settings));}
 let settings=loadSettings();

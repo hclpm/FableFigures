@@ -298,9 +298,88 @@ function jpegToPDF(jpegDataURL,wPx,hPx){
 function curProjectName(){return $("projName").value.trim()||T("untitled");}
 function uniqueName(base){const names=loadProjects().filter(p=>p.id!==curProjectId).map(p=>p.name);if(!names.includes(base))return base;let i=1;while(names.includes(base+"_"+String(i).padStart(2,"0")))i++;return base+"_"+String(i).padStart(2,"0");}
 function makeThumb(){return new Promise(res=>{let done=false;const t=setTimeout(()=>{if(!done){done=true;res(null);}},2500);rasterize(0.4,"image/jpeg",0.7).then(u=>{if(!done){done=true;clearTimeout(t);res(u);}}).catch(()=>{if(!done){done=true;clearTimeout(t);res(null);}});});}
+/* ============================ WORKING FOLDER (SVG projects) ============================
+   When a project folder is set, every *.svg in it is shown on the home screen.
+   Fable Figures saves projects there as normal SVG files and tucks the editable scene
+   into <metadata id="fable-figures-data">, so reopening restores every object.
+   SVGs made elsewhere open as an image on a new canvas and are never overwritten. */
+const FF_META_ID="fable-figures-data";
+const FF_META_RE=/<metadata[^>]*id="fable-figures-data"[^>]*>([\s\S]*?)<\/metadata>/;
+function encMeta(o){return btoa(unescape(encodeURIComponent(JSON.stringify(o))));}
+function readMeta(text){const m=FF_META_RE.exec(text||"");if(!m)return null;try{return JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/<!\[CDATA\[|\]\]>|\s+/g,"")))));}catch(e){return null;}}
+function withMeta(svg,data,name){return svg.replace(/^<svg([^>]*)>/,(_m,a)=>`<svg${a}><metadata id="${FF_META_ID}">${encMeta({app:"fable-figures",version:1,name,data})}</metadata>`);}
+function svgThumb(text){return "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(String(text).replace(FF_META_RE,"")).replace(/'/g,"%27");}
+function safeFileName(n){return (String(n||"").replace(/[\\/:*?"<>|\u0000-\u001f]+/g,"_").replace(/^\.+/,"").trim()||T("untitled")).slice(0,120);}
+function fileId(file){return "file:"+encodeURIComponent(file);}
+function baseName(file){return String(file).split(/[\\/]/).pop().replace(/\.svg$/i,"");}
+async function uniqueFilePath(base){const dir=folderDir();let p=`${dir}/${base}.svg`,i=1;while(await window.camrender.fileExists(p)){p=`${dir}/${base}_${String(i).padStart(2,"0")}.svg`;i++;}return p;}
+function svgFileToProject(f){
+  if(!f||f.text==null)return null;
+  const meta=readMeta(f.text),data=meta&&meta.data&&Array.isArray(meta.data.objs)?meta.data:null;
+  return {id:fileId(f.file),file:f.file,name:baseName(f.file),updated:f.mtime||0,thumb:svgThumb(f.text),data,foreign:!data,svgText:data?null:f.text,uploads:data?(data.uploads||[]):[]};
+}
+// Render any project (not just the open one) to SVG by briefly swapping in its scene.
+function svgForProject(p){
+  const d=p.data||{},keep={objs:state.objs,bg:state.bg,w:ART.w,h:ART.h};
+  const ab=ARTBOARDS[d.art]||ARTBOARDS[settings.artboard]||ARTBOARDS.slide;
+  state.objs=d.objs||[];state.bg=d.bg||{color:"#FFFFFF",image:null};ART.w=ab.w;ART.h=ab.h;
+  let s;try{s=serializeSVG();}finally{state.objs=keep.objs;state.bg=keep.bg;ART.w=keep.w;ART.h=keep.h;}
+  return withMeta(s,{objs:d.objs||[],bg:d.bg,art:d.art,uploads:d.uploads||p.uploads||[],seq:d.seq},p.name);
+}
+async function writeProjectsToFolder(projs){let n=0;for(const p of projs){if(!p||!p.data)continue;const target=await uniqueFilePath(safeFileName(p.name));if(await window.camrender.libWrite({file:target,data:svgForProject(p)}))n++;}return n;}
+// One-time, non-destructive move of the old fable-figures-library.json into SVG files.
+async function migrateLegacyLibrary(){
+  let txt=null;try{txt=await window.camrender.libRead(libFile());}catch(e){}
+  if(!txt)return;
+  let arr=null;try{arr=JSON.parse(txt);}catch(e){}
+  if(Array.isArray(arr)&&arr.length)await writeProjectsToFolder(arr);
+  await window.camrender.renameFile({from:libFile(),to:libFile()+".migrated"});   // kept as a backup, never deleted
+}
+let folderBusy=null;   // one scan at a time (the folder watcher fires while we write files)
+function folderRefresh(){
+  if(folderBusy)return folderBusy;
+  folderBusy=(async()=>{
+    await migrateLegacyLibrary();
+    const list=await window.camrender.listSvgs(folderDir());
+    projectsCache=(list||[]).map(svgFileToProject).filter(Boolean);
+  })().finally(()=>{folderBusy=null;});
+  return folderBusy;
+}
+async function saveProjectToFolder(name,silent){
+  const data={objs:state.objs,bg:state.bg,art:state.art,uploads:state.uploads,seq:state.seq};
+  const cur=loadProjects().find(p=>p.id===curProjectId);
+  let target=`${folderDir()}/${safeFileName(name)}.svg`;
+  if(cur&&cur.file){
+    if(cur.file!==target){                       // renamed in the title box → rename the file
+      if(await window.camrender.fileExists(target))target=await uniqueFilePath(safeFileName(name));
+      if(!(await window.camrender.renameFile({from:cur.file,to:target})))target=cur.file;
+    }
+  }else if(await window.camrender.fileExists(target))target=await uniqueFilePath(safeFileName(name));   // never overwrite someone else's file
+  const ok=await window.camrender.libWrite({file:target,data:withMeta(serializeSVG(),data,name)});
+  if(!ok){toast(T("saveFailed"),true);return;}
+  curProjectId=fileId(target);$("projName").value=baseName(target);
+  await refreshProjectsCache();dirty=false;
+  if(!silent)toast(T("saved"));$("autosaveInd").textContent=T("saved");setTimeout(()=>{if($("autosaveInd").textContent===T("saved"))$("autosaveInd").textContent="";},2000);
+}
+// An SVG made in another tool: open it as an image on a fresh canvas; saving creates a new file.
+async function openForeignSvg(proj){
+  curProjectId=null;state.objs=[];state.bg={color:"#FFFFFF",image:null};state.uploads=[];state.art=settings.artboard;
+  const ab=ARTBOARDS[state.art]||ARTBOARDS.slide;ART.w=ab.w;ART.h=ab.h;state.seq=1;state.sel=[];history.undo.length=0;history.redo.length=0;
+  const href="data:image/svg+xml;base64,"+btoa(unescape(encodeURIComponent(proj.svgText)));
+  const d=await imgDims(href).catch(()=>({w:400,h:300}));
+  const s=Math.min(ART.w*0.9/d.w,ART.h*0.9/d.h);
+  state.objs=[{id:gid(),type:"image",href,x:ART.w/2,y:ART.h/2,w:Math.round(d.w*s),h:Math.round(d.h*s),rot:0,opacity:1,fit:"contain",radius:0,shadow:false,shadowBlur:6,brightness:100,saturate:100,hue:0,tint:null,tintAmt:0}];
+  $("projName").value=uniqueName(proj.name);openEditor();dirty=true;toast(T("svgImported"));
+}
+function startFolderWatch(){if(isElectron&&window.camrender&&window.camrender.watchDir)window.camrender.watchDir(fileMode()?folderDir():null);}
+async function reloadFolderHome(){if(!fileMode())return;await refreshProjectsCache();if(!$("home").classList.contains("hidden"))renderHome();}
+if(isElectron&&window.camrender&&window.camrender.onDirChanged)window.camrender.onDirChanged(reloadFolderHome);
+window.addEventListener("focus",reloadFolderHome);
+
 async function saveProject(silent){
   if($("editor").classList.contains("hidden"))return;
   let name=curProjectName();if(name===T("untitled")||!name){name=uniqueName(T("untitled"));$("projName").value=name;}
+  if(fileMode()){await saveProjectToFolder(name,silent);return;}
   const thumb=await makeThumb();
   const projs=loadProjects();
   const data={objs:state.objs,bg:state.bg,art:state.art,uploads:state.uploads,seq:state.seq};
@@ -314,8 +393,14 @@ async function saveProject(silent){
 function loadProjectData(proj){state.objs=(proj.data&&proj.data.objs)||[];state.bg=(proj.data&&proj.data.bg)||{color:"#FFFFFF",image:null};state.uploads=(proj.data&&proj.data.uploads)||proj.uploads||[];state.art=(proj.data&&proj.data.art)||settings.artboard;const ab=ARTBOARDS[state.art]||ARTBOARDS.slide;ART.w=ab.w;ART.h=ab.h;state.seq=(proj.data&&proj.data.seq)||(maxId()+1);state.sel=[];history.undo.length=0;history.redo.length=0;dirty=false;}
 function maxId(){return state.objs.reduce((m,o)=>Math.max(m,+String(o.id).replace(/\D/g,"")||0),0);}
 function uniqueCopyName(base){const names=loadProjects().map(p=>p.name);if(!names.includes(base))return base;let i=2;while(names.includes(base+" "+i))i++;return base+" "+i;}
-function duplicateProject(id){
+async function duplicateProject(id){
   const projs=loadProjects();const src=projs.find(p=>p.id===id);if(!src)return;
+  if(fileMode()){   // copy the file as-is (the name comes from the filename)
+    const text=await window.camrender.libRead(src.file);if(text==null)return;
+    const target=await uniqueFilePath(safeFileName(uniqueCopyName((src.name||T("untitled"))+" copy")));
+    if(await window.camrender.libWrite({file:target,data:text})){await refreshProjectsCache();renderHome();toast(T("projCopied"));}
+    return;
+  }
   const copy=JSON.parse(JSON.stringify(src));               // deep copy; original is untouched
   copy.id="p"+Date.now();copy.name=uniqueCopyName((src.name||T("untitled"))+" copy");copy.updated=Date.now();
   projs.unshift(copy);saveProjects(projs);renderHome();toast(T("projCopied"));
@@ -336,9 +421,10 @@ function exportTemplates(){
 }
 function importTemplatesFromFile(file){
   const fr=new FileReader();
-  fr.onload=()=>{
+  fr.onload=async()=>{
     let parsed;try{parsed=JSON.parse(fr.result);}catch(e){toast(T("importBad"),true);return;}
     const incoming=Array.isArray(parsed)?parsed:((parsed&&parsed.projects)||[]);
+    if(fileMode()){const n=await writeProjectsToFolder(incoming);if(!n){toast(T("importBad"),true);return;}await refreshProjectsCache();renderHome();toast(n+" "+T("templatesImported"));return;}
     const projs=loadProjects();const names=new Set(projs.map(p=>p.name));let added=0;
     for(const p of incoming){
       if(!p||!p.data)continue;
@@ -354,17 +440,20 @@ function importTemplatesFromFile(file){
 }
 function renderHome(){
   $("homeTag").textContent=T("tagline");$("newProjectLbl").textContent=T("newProject");$("recentLbl").textContent=T("recent");$("homeLang").textContent=settings.lang==="en"?"한국어":"English";
+  if(fileMode()){const fd=folderDir();$("recentLbl").textContent=T("recent")+" · "+fd.split(/[\\/]/).pop();$("recentLbl").title=fd;}else $("recentLbl").title="";
   const projs=loadProjects().sort((a,b)=>b.updated-a.updated);const g=$("projGrid");
-  if(!projs.length){g.innerHTML=`<div class="empty-projects" style="grid-column:1/-1">${T("noProjects")}</div>`;return;}
-  g.innerHTML=projs.map(p=>`<div class="proj-card" data-id="${p.id}"><div class="proj-dup" data-dup="${p.id}" title="${T("duplicate")}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 012-2h10" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="proj-del" data-del="${p.id}" title="${T("delete")}"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 7h14M9 7V5h6v2M7 7l1 13h8l1-13" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="proj-thumb" style="${p.thumb?`background-image:url(${p.thumb})`:""}"></div><div class="proj-meta"><div class="nm">${escapeHtml(p.name)}</div><div class="dt">${new Date(p.updated).toLocaleString()}</div></div></div>`).join("");
+  if(!projs.length){g.innerHTML=`<div class="empty-projects" style="grid-column:1/-1">${T(fileMode()?"noSvgInFolder":"noProjects")}</div>`;return;}
+  g.innerHTML=projs.map(p=>`<div class="proj-card" data-id="${p.id}"><div class="proj-dup" data-dup="${p.id}" title="${T("duplicate")}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 012-2h10" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="proj-del" data-del="${p.id}" title="${T("delete")}"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 7h14M9 7V5h6v2M7 7l1 13h8l1-13" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="proj-thumb${p.file?" svg":""}" style="${p.thumb?`background-image:url('${p.thumb}')`:""}">${p.foreign?`<span class="proj-badge">SVG</span>`:""}</div><div class="proj-meta"><div class="nm">${escapeHtml(p.name)}</div><div class="dt">${new Date(p.updated).toLocaleString()}</div></div></div>`).join("");
   g.querySelectorAll(".proj-card").forEach(c=>c.onclick=e=>{if(e.target.closest("[data-del]")||e.target.closest("[data-dup]"))return;openProject(c.getAttribute("data-id"));});
-  g.querySelectorAll("[data-del]").forEach(d=>d.onclick=e=>{e.stopPropagation();if(confirm(T("confirmDelete"))){saveProjects(loadProjects().filter(p=>p.id!==d.getAttribute("data-del")));renderHome();}});
+  g.querySelectorAll("[data-del]").forEach(d=>d.onclick=async e=>{e.stopPropagation();const id=d.getAttribute("data-del");
+    if(fileMode()){const p=loadProjects().find(x=>x.id===id);if(p&&confirm(T("confirmTrash"))){await window.camrender.trashFile(p.file);await refreshProjectsCache();renderHome();}return;}
+    if(confirm(T("confirmDelete"))){saveProjects(loadProjects().filter(p=>p.id!==id));renderHome();}});
   g.querySelectorAll("[data-dup]").forEach(d=>d.onclick=e=>{e.stopPropagation();duplicateProject(d.getAttribute("data-dup"));});
 }
-function showHome(){$("editor").classList.add("hidden");$("home").classList.remove("hidden");renderHome();}
+function showHome(){$("editor").classList.add("hidden");$("home").classList.remove("hidden");renderHome();if(fileMode())reloadFolderHome();}
 function openEditor(){$("home").classList.add("hidden");$("editor").classList.remove("hidden");buildTabs();buildLibrary();render();renderProps();updateUndo();fitView();}
 function newProject(){curProjectId=null;state.objs=[];state.bg={color:"#FFFFFF",image:null};state.uploads=[];state.art=settings.artboard;const ab=ARTBOARDS[state.art]||ARTBOARDS.slide;ART.w=ab.w;ART.h=ab.h;state.seq=1;state.sel=[];history.undo.length=0;history.redo.length=0;dirty=false;$("projName").value=uniqueName(T("untitled"));openEditor();}
-function openProject(id){const proj=loadProjects().find(p=>p.id===id);if(!proj)return;curProjectId=id;loadProjectData(proj);$("projName").value=proj.name;openEditor();}
+function openProject(id){const proj=loadProjects().find(p=>p.id===id);if(!proj)return;if(proj.foreign){openForeignSvg(proj);return;}curProjectId=id;loadProjectData(proj);$("projName").value=proj.name;openEditor();}
 function tryGoHome(){if(dirty){openModal("confirmModal");}else showHome();}
 $("homeBtn").onclick=tryGoHome;$("newProjectBtn").onclick=newProject;
 $("cfCancel").onclick=()=>closeModal("confirmModal");$("cfDiscard").onclick=()=>{dirty=false;closeModal("confirmModal");showHome();};$("cfSave").onclick=async()=>{await saveProject();closeModal("confirmModal");showHome();};
@@ -407,8 +496,12 @@ document.querySelectorAll("#setLang [data-lang]").forEach(b=>b.onclick=()=>{sett
 document.querySelectorAll("#setAppear [data-appear]").forEach(b=>b.onclick=()=>{settings.appearance=b.getAttribute("data-appear");saveSettings();applyAppearance();openSettings();});
 document.querySelectorAll("#setTheme [data-theme]").forEach(b=>b.onclick=()=>{settings.theme=b.getAttribute("data-theme");saveSettings();applyTheme();openSettings();});
 $("setArt").onchange=function(){settings.artboard=this.value;saveSettings();};
-$("setFolderChange").onclick=async()=>{if(!(isElectron&&window.camrender&&window.camrender.pickFolder)){toast(T("desktopOnly"),true);return;}const dir=await window.camrender.pickFolder();if(!dir)return;const existing=loadProjects();settings.projectDir=dir;saveSettings();projectsCache=existing.slice();saveProjects(existing);/* migrate current projects into the folder */await refreshProjectsCache();openSettings();renderHome();toast(T("folderSet"));};
-$("setFolderDefault").onclick=()=>{const existing=loadProjects();settings.projectDir="";saveSettings();projectsCache=null;saveProjects(existing);/* migrate back to app storage */openSettings();renderHome();};
+$("setFolderChange").onclick=async()=>{if(!(isElectron&&window.camrender&&window.camrender.pickFolder)){toast(T("desktopOnly"),true);return;}const dir=await window.camrender.pickFolder();if(!dir)return;
+  const appProjs=fileMode()?[]:loadProjects();   // projects kept in app storage (left untouched there)
+  settings.projectDir=dir;saveSettings();projectsCache=null;
+  if(appProjs.length&&confirm(T("copyToFolder").replace("{n}",appProjs.length)))await writeProjectsToFolder(appProjs);
+  await refreshProjectsCache();startFolderWatch();openSettings();renderHome();toast(T("folderSet"));};
+$("setFolderDefault").onclick=()=>{settings.projectDir="";saveSettings();projectsCache=null;startFolderWatch();/* folder files stay where they are */openSettings();renderHome();};
 $("setTmplExport").onclick=()=>exportTemplates();
 $("setTmplImport").onclick=()=>$("tmplFile").click();
 $("tmplFile").addEventListener("change",e=>{const f=e.target.files&&e.target.files[0];if(f)importTemplatesFromFile(f);e.target.value="";});
@@ -497,5 +590,5 @@ window.addEventListener("keydown",e=>{
 });
 
 /* ============================ INIT ============================ */
-function init(){if(/Mac/i.test(navigator.userAgent)&&/Electron/i.test(navigator.userAgent))document.body.classList.add("mac-electron");applyAppearance();updateAutosavePill();applyI18n();if(fileMode())refreshProjectsCache().then(renderHome);else renderHome();window.addEventListener("resize",()=>{if(!$("editor").classList.contains("hidden"))render();});}
+function init(){if(/Mac/i.test(navigator.userAgent)&&/Electron/i.test(navigator.userAgent))document.body.classList.add("mac-electron");applyAppearance();updateAutosavePill();applyI18n();if(fileMode()){refreshProjectsCache().then(renderHome);startFolderWatch();}else renderHome();window.addEventListener("resize",()=>{if(!$("editor").classList.contains("hidden"))render();});}
 init();

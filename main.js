@@ -1,5 +1,5 @@
 // Fable Figures — Electron main process. Crafted by Lee.
-const { app, BrowserWindow, Menu, ipcMain, dialog, nativeImage } = require("electron");
+const { app, BrowserWindow, Menu, ipcMain, dialog, nativeImage, shell } = require("electron");
 const path = require("path");
 const fs = require("fs");
 
@@ -104,6 +104,37 @@ ipcMain.handle("lib-read", (_e, file) => { try { return fs.readFileSync(file, "u
 ipcMain.handle("lib-write", (_e, { file, data }) => {
   try { fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, data); return true; }
   catch (e) { return false; }
+});
+
+// ---- working folder: every *.svg in the chosen folder is a project ----
+ipcMain.handle("dir-list-svgs", (_e, dir) => {
+  try {
+    return fs.readdirSync(dir, { withFileTypes: true })
+      .filter(d => d.isFile() && /\.svg$/i.test(d.name) && !d.name.startsWith("."))
+      .map(d => {
+        const file = path.join(dir, d.name);
+        let st = null, text = null;
+        try { st = fs.statSync(file); text = fs.readFileSync(file, "utf8"); } catch (e) {}
+        return { file, name: d.name, mtime: st ? st.mtimeMs : 0, text };
+      });
+  } catch (e) { return null; }
+});
+ipcMain.handle("file-exists", (_e, file) => { try { return fs.existsSync(file); } catch (e) { return false; } });
+ipcMain.handle("file-rename", (_e, { from, to }) => { try { fs.renameSync(from, to); return true; } catch (e) { return false; } });
+// Deleting a project moves its file to the system Trash, so it can always be recovered.
+ipcMain.handle("file-trash", async (_e, file) => { try { await shell.trashItem(file); return true; } catch (e) { return false; } });
+let dirWatcher = null, dirTimer = null;
+ipcMain.handle("watch-dir", (_e, dir) => {
+  try { if (dirWatcher) dirWatcher.close(); } catch (e) {}
+  dirWatcher = null;
+  if (!dir) return false;
+  try {
+    dirWatcher = fs.watch(dir, () => {
+      clearTimeout(dirTimer);
+      dirTimer = setTimeout(() => { if (win && !win.isDestroyed()) win.webContents.send("dir-changed"); }, 400);
+    });
+    return true;
+  } catch (e) { return false; }
 });
 
 app.whenReady().then(() => {

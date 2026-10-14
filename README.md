@@ -126,7 +126,12 @@ app/
 The three files in `app/` load as ordinary script tags and share one global scope, so
 there's nothing to compile. If you're extending it: shapes live in `shapePath()` +
 `SHAPES`, icons in `ICONS`, presets in `buildPreset()`/`buildNetwork()`, and UI strings in
-the `I18N` map. Projects are stored in `localStorage` (or a folder you pick in Settings).
+the `I18N` map. Projects are stored in `localStorage` by default. If you pick a working
+folder in Settings, every `.svg` in that folder shows up on the home screen (the list refreshes
+when files change), and projects are saved there as ordinary SVG files with the editable scene
+embedded in `<metadata id="fable-figures-data">` — so they open in any viewer and reopen fully
+editable in Fable Figures. SVGs made in other tools open as an image on a new canvas and are
+never overwritten; deleting a project moves its file to the Trash.
 Internal identifiers still use the project's old codename, `camrender`, for storage
 compatibility; the app itself is Fable Figures.
 

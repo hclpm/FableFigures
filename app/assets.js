@@ -243,6 +243,11 @@ var I18N = {
     projectFolder:"Project folder", appStorage:"App storage", change:"Change…", folderSet:"Projects now saved to that folder", desktopOnly:"Available in the desktop app",
     noSavedNet:"No saved project named “Preset-Network %n%”. Build it, save a project with that name, then use this preset.",
     projCopied:"Project copied",
+    noSvgInFolder:"No SVG files in this folder yet. Create a project and save — it's written here as an .svg.",
+    confirmTrash:"Move this SVG file to the Trash? You can restore it from the Trash.",
+    copyToFolder:"Also copy your {n} existing project(s) into this folder as SVG files? (The originals stay in app storage.)",
+    svgImported:"Opened as an image — saving creates a new file, so the original SVG isn't changed",
+    saveFailed:"Couldn't write the file to the project folder",
     templates:"Templates", templatesHint:"Move saved templates to another Mac", import:"Import",
     templatesExported:"Templates exported:", templatesImported:"template(s) imported",
     importBad:"Invalid or empty templates file", noTemplatesExport:"No templates to export yet"
@@ -266,6 +271,11 @@ var I18N = {
     projectFolder:"프로젝트 저장 위치", appStorage:"앱 내부 저장", change:"변경…", folderSet:"이제 해당 폴더에 저장됩니다", desktopOnly:"데스크탑 앱에서만 가능",
     noSavedNet:"“Preset-Network %n%” 이름의 저장된 프로젝트가 없습니다. 해당 이름으로 프로젝트를 저장한 뒤 이 프리셋을 사용하세요.",
     projCopied:"프로젝트가 복사되었습니다",
+    noSvgInFolder:"이 폴더에 아직 SVG 파일이 없습니다. 프로젝트를 만들고 저장하면 이 폴더에 .svg로 기록됩니다.",
+    confirmTrash:"이 SVG 파일을 휴지통으로 옮길까요? 휴지통에서 복구할 수 있습니다.",
+    copyToFolder:"기존 프로젝트 {n}개도 이 폴더에 SVG 파일로 복사할까요? (원본은 앱 저장소에 그대로 남습니다.)",
+    svgImported:"이미지로 열었습니다 — 저장 시 새 파일로 기록되어 원본 SVG는 바뀌지 않습니다",
+    saveFailed:"프로젝트 폴더에 파일을 쓰지 못했습니다",
     templates:"템플릿", templatesHint:"저장한 템플릿을 다른 Mac으로 이동", import:"불러오기",
     templatesExported:"템플릿 내보냄:", templatesImported:"개 템플릿 불러옴",
     importBad:"잘못되었거나 비어있는 템플릿 파일", noTemplatesExport:"내보낼 템플릿이 없습니다"

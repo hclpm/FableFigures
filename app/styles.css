@@ -52,7 +52,9 @@ input,select,textarea{font-family:inherit;color:inherit}
 .proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:20px}
 .proj-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:transform .1s,box-shadow .1s;position:relative}
 .proj-card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
-.proj-thumb{aspect-ratio:16/10;background:var(--ivory) center/cover no-repeat;border-bottom:1px solid var(--border)}
+.proj-thumb{aspect-ratio:16/10;background:var(--ivory) center/cover no-repeat;border-bottom:1px solid var(--border);position:relative}
+.proj-thumb.svg{background-color:#fff;background-size:contain}
+.proj-badge{position:absolute;left:8px;bottom:8px;font-size:10px;font-weight:600;letter-spacing:.04em;padding:2px 7px;border-radius:999px;background:var(--accent-soft);color:var(--accent-deep);border:1px solid var(--border)}
 .proj-meta{padding:11px 13px}
 .proj-meta .nm{font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .proj-meta .dt{font-size:11px;color:var(--subtle);margin-top:2px}
