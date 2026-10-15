@@ -130,8 +130,14 @@ the `I18N` map. Projects are stored in `localStorage` by default. If you pick a 
 folder in Settings, every `.svg` in that folder shows up on the home screen (the list refreshes
 when files change), and projects are saved there as ordinary SVG files with the editable scene
 embedded in `<metadata id="fable-figures-data">` — so they open in any viewer and reopen fully
-editable in Fable Figures. SVGs made in other tools open as an image on a new canvas and are
-never overwritten; deleting a project moves its file to the Trash.
+editable in Fable Figures. SVGs made in other tools (a poster from Illustrator, Inkscape or a
+script) are split into separate editable objects on a canvas the size of the original page —
+text becomes text boxes, rectangles/circles become shapes, lines become connectors, images stay
+images, and anything without a native equivalent (paths, clipped charts such as an embedded
+matplotlib figure) becomes a movable vector piece. Embedded fonts come along, and the original
+file is never overwritten. An SVG dropped onto the canvas can be split the same way with
+**Make every element editable** in its properties. Deleting a project moves its file to the Trash.
+The importer lives in `app/svg-import.js`.
 Internal identifiers still use the project's old codename, `camrender`, for storage
 compatibility; the app itself is Fable Figures.
 

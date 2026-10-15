@@ -157,8 +157,9 @@ function singleProps(o){
   if(o.type==="shape"){h+=`<div class="psec"><h3>Fill</h3>${swRow(o.fill,"fill",`<button class="swatch" style="background:${o.fill};width:22px;height:22px"><input type="color" id="pFill" value="${hexOf(o.fill)}"></button>`)}</div><div class="psec"><h3>Stroke</h3>${swRow(o.stroke,"stroke")}<div class="prow" style="margin-top:9px"><label>Width</label><input type="range" id="pSW" min="0" max="16" step="0.5" value="${o.strokeWidth}"><span style="font-size:11px;width:30px;text-align:right" id="pSWV">${o.strokeWidth}</span></div><div class="toggle"><span>Dashed</span><div class="sw ${o.dash?'on':''}" id="pDash"></div></div></div>`;}
   if(o.type==="icon"){if(window.CAM.RECOLOR_ICONS.indexOf(o.shapeKind)>=0){h+=`<div class="psec"><h3>Color</h3>${swRow(o.fill||"#3A3F45","fill",`<button class="swatch" style="background:${o.fill||'#3A3F45'};width:22px;height:22px"><input type="color" id="pFill" value="${hexOf(o.fill||'#3A3F45')}"></button>`)}</div>`;}else h+=colorAdjustSec(o);}
   if(o.type==="image"){h+=`<div class="psec"><h3>Image</h3><div class="prow"><label>Fit</label><div class="seg" style="flex:1"><button data-fit="cover" class="${o.fit==='cover'?'on':''}">Cover</button><button data-fit="contain" class="${o.fit==='contain'?'on':''}">Contain</button></div></div><div class="prow"><label>Radius</label><input type="range" id="pRad" min="0" max="80" value="${o.radius||0}"><span style="font-size:11px;width:30px;text-align:right" id="pRadV">${o.radius||0}</span></div></div>`+colorAdjustSec(o);}
-  if(o.type==="text"){h+=`<div class="psec"><h3>Text</h3><textarea class="ptext" id="pText">${escapeHtml(o.text)}</textarea><div class="prow" style="margin-top:9px"><label>Font</label><select class="num" id="pFont">${FONTS.map(f=>`<option value="${f[0]}" ${o.font===f[0]?'selected':''}>${f[1]}</option>`).join("")}</select></div><div class="prow"><label>Size</label><input type="range" id="pFS" min="8" max="200" value="${o.fontSize}"><input class="num" id="pFSNum" style="width:50px;text-align:right" value="${Math.round(o.fontSize)}"></div><div class="prow"><label>Style</label><div class="seg" style="flex:1"><button data-ts="bold" class="${o.weight>=700?'on':''}" style="font-weight:800">B</button><button data-ts="italic" class="${o.italic?'on':''}" style="font-style:italic">I</button><button data-ts="underline" class="${o.underline?'on':''}"><span style="text-decoration:underline">U</span></button></div></div><div class="prow"><label>Align</label><div class="seg" style="flex:1"><button data-align="left" class="${o.align==='left'?'on':''}">L</button><button data-align="center" class="${o.align==='center'?'on':''}">C</button><button data-align="right" class="${o.align==='right'?'on':''}">R</button></div></div><div style="font-size:10px;color:var(--subtle);margin-bottom:7px">Color</div>${swRow(o.fill,"fill",`<button class="swatch" style="background:${o.fill};width:22px;height:22px"><input type="color" id="pFill" value="${hexOf(o.fill)}"></button>`)}</div>`;}
-  if(o.type!=="text")h+=shadowSec(o);
+  if(o.type==="text"){h+=`<div class="psec"><h3>Text</h3><textarea class="ptext" id="pText">${escapeHtml(o.text)}</textarea><div class="prow" style="margin-top:9px"><label>Font</label><select class="num" id="pFont">${FONTS.some(f=>f[0]===o.font)?"":`<option value="${escapeHtml(o.font||"")}" selected>${escapeHtml(String(o.font||"").split(",")[0].replace(/'/g,""))}</option>`}${FONTS.map(f=>`<option value="${f[0]}" ${o.font===f[0]?'selected':''}>${f[1]}</option>`).join("")}</select></div><div class="prow"><label>Size</label><input type="range" id="pFS" min="8" max="200" value="${o.fontSize}"><input class="num" id="pFSNum" style="width:50px;text-align:right" value="${Math.round(o.fontSize)}"></div><div class="prow"><label>Style</label><div class="seg" style="flex:1"><button data-ts="bold" class="${o.weight>=700?'on':''}" style="font-weight:800">B</button><button data-ts="italic" class="${o.italic?'on':''}" style="font-style:italic">I</button><button data-ts="underline" class="${o.underline?'on':''}"><span style="text-decoration:underline">U</span></button></div></div><div class="prow"><label>Align</label><div class="seg" style="flex:1"><button data-align="left" class="${o.align==='left'?'on':''}">L</button><button data-align="center" class="${o.align==='center'?'on':''}">C</button><button data-align="right" class="${o.align==='right'?'on':''}">R</button></div></div><div style="font-size:10px;color:var(--subtle);margin-bottom:7px">Color</div>${swRow(o.fill,"fill",`<button class="swatch" style="background:${o.fill};width:22px;height:22px"><input type="color" id="pFill" value="${hexOf(o.fill)}"></button>`)}</div>`;}
+  if(o.type==="image"&&/^data:image\/svg\+xml/i.test(o.href||""))h+=`<div class="psec"><h3>SVG</h3><button class="btn" id="pUngroupSvg" style="width:100%">${T("svgUngroup")}</button><p style="font-size:11px;color:var(--subtle);line-height:1.5;margin:7px 0 0">${T("svgUngroupHint")}</p></div>`;
+  if(o.type!=="text"&&o.type!=="svg")h+=shadowSec(o);
   h+=arrangeSec()+`<div class="danger-row"><button class="btn del" id="pDel">${T("delete")}</button></div>`;
   return h;
 }
@@ -196,7 +197,7 @@ function bindMulti(){const d=$("pDel");if(d)d.onclick=deleteSel;bindArrange();
   const fc=$("mFillC");if(fc)fc.oninput=()=>{selObjs().forEach(o=>o.fill=fc.value);render();};
   document.querySelectorAll("[data-mts]").forEach(b=>b.onclick=()=>{pushHistory();const k=b.getAttribute("data-mts"),sel=selObjs(),ref=sel[0];const val=k==="bold"?(ref.weight>=700?400:700):k==="italic"?!ref.italic:!ref.underline;sel.forEach(o=>{if(k==="bold")o.weight=val;else if(k==="italic")o.italic=val;else o.underline=val;});render();renderProps();});
   document.querySelectorAll("[data-malign]").forEach(b=>b.onclick=()=>{pushHistory();const v=b.getAttribute("data-malign");selObjs().forEach(o=>o.align=v);render();renderProps();});
-  const setAllFS=v=>selObjs().forEach(o=>{o.fontSize=v;o.h=Math.max(v*1.3,String(o.text).split("\n").length*v*1.25+8);});
+  const setAllFS=v=>selObjs().forEach(o=>{o.fontSize=v;o.h=textBoxH(o);});
   const mfs=$("mFS"),mfsn=$("mFSNum");if(mfs){let st=false;mfs.oninput=()=>{if(!st){pushHistory();st=true;}const v=+mfs.value;if(mfsn)mfsn.value=v;setAllFS(v);render();};mfs.onchange=()=>{st=false;};}
   if(mfsn)mfsn.onchange=()=>{pushHistory();const v=clamp(Math.round(+mfsn.value||12),4,400);if(mfs)mfs.value=Math.min(200,v);setAllFS(v);render();};
   bulkRange("mSW",(o,v)=>o.strokeWidth=v);const mswn=$("mSWNum");if(mswn)mswn.onchange=()=>{pushHistory();const v=+mswn.value||0;selObjs().forEach(o=>o.strokeWidth=v);render();};
@@ -219,12 +220,13 @@ function bindSingle(o){
   swH("fill",c=>o.fill=c);swH("stroke",c=>o.stroke=c);swH("cstroke",c=>o.stroke=c);
   const fc=$("pFill");if(fc)fc.oninput=()=>{o.fill=fc.value;render();renderProps();};
   if(o.type==="shape"){rangeH("pSW","pSWV",v=>o.strokeWidth=v);toggleH("pDash",()=>o.dash=!o.dash);}
-  if(o.type==="text"){const ta=$("pText");if(ta)ta.oninput=()=>{o.text=ta.value;o.h=Math.max(o.fontSize*1.3,ta.value.split("\n").length*o.fontSize*1.25+8);render();};const ft=$("pFont");if(ft)ft.onchange=()=>{pushHistory();o.font=ft.value;render();};
-    const setFS=v=>{o.fontSize=v;o.h=Math.max(v*1.3,String(o.text).split("\n").length*v*1.25+8);};
+  if(o.type==="text"){const ta=$("pText");if(ta)ta.oninput=()=>{setTextValue(o,ta.value);render();};const ft=$("pFont");if(ft)ft.onchange=()=>{pushHistory();o.font=ft.value;render();};
+    const setFS=v=>{o.fontSize=v;o.h=textBoxH(o);};
     const fs=$("pFS"),fsn=$("pFSNum");if(fs){let st=false;fs.oninput=()=>{if(!st){pushHistory();st=true;}const v=+fs.value;setFS(v);if(fsn)fsn.value=v;render();};fs.onchange=()=>{st=false;};}
     if(fsn)fsn.onchange=()=>{pushHistory();const v=clamp(Math.round(+fsn.value||12),4,400);setFS(v);if(fs)fs.value=Math.min(200,v);render();};
     document.querySelectorAll("[data-ts]").forEach(b=>b.onclick=()=>{pushHistory();const k=b.getAttribute("data-ts");if(k==="bold")o.weight=o.weight>=700?400:700;if(k==="italic")o.italic=!o.italic;if(k==="underline")o.underline=!o.underline;render();renderProps();});segH("align",v=>o.align=v);}
   if(o.type==="image"){segH("fit",v=>o.fit=v);rangeH("pRad","pRadV",v=>o.radius=v);}
+  if(o.type==="image"){const ub=$("pUngroupSvg");if(ub)ub.onclick=()=>ungroupSvgImage(o);}
   if(o.type==="icon"||o.type==="image"){rangeH("pBri","pBriV",v=>o.brightness=v);rangeH("pSat","pSatV",v=>o.saturate=v);rangeH("pHue","pHueV",v=>o.hue=v);rangeH("pTintAmt","pTintAmtV",v=>o.tintAmt=v);swH("itint",c=>{o.tint=c==="none"?null:c;if(c!=="none"&&!o.tintAmt)o.tintAmt=45;});const rb=$("pImgReset");if(rb)rb.onclick=()=>{pushHistory();o.brightness=100;o.saturate=100;o.hue=0;o.tint=null;o.tintAmt=0;render();renderProps();};}
   if(o.type!=="text"&&o.type!=="connector"){toggleH("pShadow",()=>{o.shadow=!o.shadow;renderProps();});rangeH("pShB","pShBV",v=>o.shadowBlur=v);}
   if(o.type==="connector"){rangeH("cSW","cSWV",v=>o.strokeWidth=v);rangeH("cHS","cHSV",v=>o.headSize=v);rangeH("cOp","cOpV",v=>o.opacity=v/100,v=>Math.round(v)+"%");segH("body",v=>o.body=v);segH("cstyle",v=>o.style=v);const hh=$("cHead");if(hh){hh.value=o.head||"triangle";hh.onchange=()=>{pushHistory();o.head=hh.value;render();};}const tt=$("cTail");if(tt){tt.value=o.tail||"none";tt.onchange=()=>{pushHistory();o.tail=tt.value;render();};}}
@@ -252,10 +254,10 @@ function loadTemplate(kind){
     return;
   }
 }
-function setArtboard(key){const ab=ARTBOARDS[key];if(!ab)return;ART.w=ab.w;ART.h=ab.h;state.art=key;fitView();markDirty();toast(ab.label);}
+function setArtboard(key){const ab=ARTBOARDS[key];if(!ab)return;ART.w=ab.w;ART.h=ab.h;state.art=key;state.artSize=null;fitView();markDirty();toast(ab.label);}
 
 /* ============================ EXPORT (#6) ============================ */
-function serializeSVG(){const svg=`<svg xmlns="${SVGNS}" width="${ART.w}" height="${ART.h}" viewBox="0 0 ${ART.w} ${ART.h}"><rect x="0" y="0" width="${ART.w}" height="${ART.h}" fill="${state.bg.color}"/>${state.bg.image?`<image x="0" y="0" width="${ART.w}" height="${ART.h}" href="${state.bg.image}" preserveAspectRatio="xMidYMid slice"/>`:""}${state.objs.map(o=>o.type==="connector"?connectorMarkup(o).replace(/class="[^"]*"/g,""):`<g transform="translate(${o.x},${o.y}) rotate(${o.rot||0})">${objMarkup(o)}</g>`).join("")}</svg>`;return svg;}
+function serializeSVG(){const svg=`<svg xmlns="${SVGNS}" width="${ART.w}" height="${ART.h}" viewBox="0 0 ${ART.w} ${ART.h}">${(state.fontFaces&&state.fontFaces.length)?`<defs><style>${state.fontFaces.join("\n")}</style></defs>`:""}<rect x="0" y="0" width="${ART.w}" height="${ART.h}" fill="${state.bg.color}"/>${state.bg.image?`<image x="0" y="0" width="${ART.w}" height="${ART.h}" href="${state.bg.image}" preserveAspectRatio="xMidYMid slice"/>`:""}${state.objs.map(o=>o.type==="connector"?connectorMarkup(o).replace(/class="[^"]*"/g,""):`<g transform="translate(${o.x},${o.y}) rotate(${o.rot||0})">${objMarkup(o)}</g>`).join("")}</svg>`;return svg;}
 function svgToImage(scale){return new Promise((res,rej)=>{const str=serializeSVG(),img=new Image();img.onload=()=>res(img);img.onerror=rej;img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(str);});}
 async function rasterize(scale,type,quality){const img=await svgToImage(scale);const c=document.createElement("canvas");c.width=ART.w*scale;c.height=ART.h*scale;const ctx=c.getContext("2d");if(type==="image/jpeg"){ctx.fillStyle="#fff";ctx.fillRect(0,0,c.width,c.height);}ctx.drawImage(img,0,0,c.width,c.height);return c.toDataURL(type||"image/png",quality||0.95);}
 function dlAnchor(name,url){const a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();}
@@ -307,7 +309,8 @@ const FF_META_ID="fable-figures-data";
 const FF_META_RE=/<metadata[^>]*id="fable-figures-data"[^>]*>([\s\S]*?)<\/metadata>/;
 function encMeta(o){return btoa(unescape(encodeURIComponent(JSON.stringify(o))));}
 function readMeta(text){const m=FF_META_RE.exec(text||"");if(!m)return null;try{return JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/<!\[CDATA\[|\]\]>|\s+/g,"")))));}catch(e){return null;}}
-function withMeta(svg,data,name){return svg.replace(/^<svg([^>]*)>/,(_m,a)=>`<svg${a}><metadata id="${FF_META_ID}">${encMeta({app:"fable-figures",version:1,name,data})}</metadata>`);}
+// Embedded fonts are already in the SVG's own <style>, so they aren't duplicated into the metadata.
+function withMeta(svg,data,name){data=Object.assign({},data);if(data.fontFaces&&data.fontFaces.length)data.hasFonts=true;delete data.fontFaces;return svg.replace(/^<svg([^>]*)>/,(_m,a)=>`<svg${a}><metadata id="${FF_META_ID}">${encMeta({app:"fable-figures",version:1,name,data})}</metadata>`);}
 function svgThumb(text){return "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(String(text).replace(FF_META_RE,"")).replace(/'/g,"%27");}
 function safeFileName(n){return (String(n||"").replace(/[\\/:*?"<>|\u0000-\u001f]+/g,"_").replace(/^\.+/,"").trim()||T("untitled")).slice(0,120);}
 function fileId(file){return "file:"+encodeURIComponent(file);}
@@ -316,15 +319,16 @@ async function uniqueFilePath(base){const dir=folderDir();let p=`${dir}/${base}.
 function svgFileToProject(f){
   if(!f||f.text==null)return null;
   const meta=readMeta(f.text),data=meta&&meta.data&&Array.isArray(meta.data.objs)?meta.data:null;
+  if(data&&data.hasFonts)data.fontFaces=(String(f.text).match(/@font-face\s*\{[^}]*\}/gi)||[]);
   return {id:fileId(f.file),file:f.file,name:baseName(f.file),updated:f.mtime||0,thumb:svgThumb(f.text),data,foreign:!data,svgText:data?null:f.text,uploads:data?(data.uploads||[]):[]};
 }
 // Render any project (not just the open one) to SVG by briefly swapping in its scene.
 function svgForProject(p){
-  const d=p.data||{},keep={objs:state.objs,bg:state.bg,w:ART.w,h:ART.h};
-  const ab=ARTBOARDS[d.art]||ARTBOARDS[settings.artboard]||ARTBOARDS.slide;
-  state.objs=d.objs||[];state.bg=d.bg||{color:"#FFFFFF",image:null};ART.w=ab.w;ART.h=ab.h;
-  let s;try{s=serializeSVG();}finally{state.objs=keep.objs;state.bg=keep.bg;ART.w=keep.w;ART.h=keep.h;}
-  return withMeta(s,{objs:d.objs||[],bg:d.bg,art:d.art,uploads:d.uploads||p.uploads||[],seq:d.seq},p.name);
+  const d=p.data||{},keep={objs:state.objs,bg:state.bg,w:ART.w,h:ART.h,ff:state.fontFaces};
+  const ab=artDims(d.art||settings.artboard,d.artSize);
+  state.objs=d.objs||[];state.bg=d.bg||{color:"#FFFFFF",image:null};ART.w=ab.w;ART.h=ab.h;state.fontFaces=d.fontFaces||[];
+  let s;try{s=serializeSVG();}finally{state.objs=keep.objs;state.bg=keep.bg;ART.w=keep.w;ART.h=keep.h;state.fontFaces=keep.ff;}
+  return withMeta(s,{objs:d.objs||[],bg:d.bg,art:d.art,artSize:d.artSize||null,uploads:d.uploads||p.uploads||[],seq:d.seq,fontFaces:d.fontFaces||[]},p.name);
 }
 async function writeProjectsToFolder(projs){let n=0;for(const p of projs){if(!p||!p.data)continue;const target=await uniqueFilePath(safeFileName(p.name));if(await window.camrender.libWrite({file:target,data:svgForProject(p)}))n++;}return n;}
 // One-time, non-destructive move of the old fable-figures-library.json into SVG files.
@@ -346,7 +350,7 @@ function folderRefresh(){
   return folderBusy;
 }
 async function saveProjectToFolder(name,silent){
-  const data={objs:state.objs,bg:state.bg,art:state.art,uploads:state.uploads,seq:state.seq};
+  const data={objs:state.objs,bg:state.bg,art:state.art,artSize:state.artSize||null,uploads:state.uploads,seq:state.seq,fontFaces:state.fontFaces||[]};
   const cur=loadProjects().find(p=>p.id===curProjectId);
   let target=`${folderDir()}/${safeFileName(name)}.svg`;
   if(cur&&cur.file){
@@ -361,15 +365,42 @@ async function saveProjectToFolder(name,silent){
   await refreshProjectsCache();dirty=false;
   if(!silent)toast(T("saved"));$("autosaveInd").textContent=T("saved");setTimeout(()=>{if($("autosaveInd").textContent===T("saved"))$("autosaveInd").textContent="";},2000);
 }
-// An SVG made in another tool: open it as an image on a fresh canvas; saving creates a new file.
+// An SVG made in another tool: break it into editable objects on a canvas the size of the
+// original page. Saving creates a new file, so the original SVG is never overwritten.
 async function openForeignSvg(proj){
-  curProjectId=null;state.objs=[];state.bg={color:"#FFFFFF",image:null};state.uploads=[];state.art=settings.artboard;
-  const ab=ARTBOARDS[state.art]||ARTBOARDS.slide;ART.w=ab.w;ART.h=ab.h;state.seq=1;state.sel=[];history.undo.length=0;history.redo.length=0;
+  curProjectId=null;state.objs=[];state.bg={color:"#FFFFFF",image:null};state.uploads=[];state.art=settings.artboard;state.artSize=null;state.fontFaces=[];
+  state.seq=1;state.sel=[];history.undo.length=0;history.redo.length=0;
+  let r=null;try{r=await importSvgText(proj.svgText);}catch(e){console.warn("SVG import failed",e);}
+  if(r&&r.objs.length){
+    const mx=Math.max(r.w,r.h),k=mx>6000?6000/mx:mx<600?1200/mx:1;   // keep the page a workable size
+    if(k!==1)transformImportedObjs(r.objs,k,p=>({x:p.x*k,y:p.y*k}),0);
+    state.art="custom";state.artSize={w:+(r.w*k).toFixed(2),h:+(r.h*k).toFixed(2)};ART.w=state.artSize.w;ART.h=state.artSize.h;
+    state.objs=r.objs;if(r.bg)state.bg.color=r.bg;state.fontFaces=r.fontFaces||[];applyProjectFonts();
+    $("projName").value=uniqueName(proj.name);openEditor();dirty=true;toast(T("svgImported").replace("{n}",r.objs.length));return;
+  }
+  // Couldn't be split (unusual SVG) → fall back to a single image so it still opens.
+  const ab=ARTBOARDS[state.art]||ARTBOARDS.slide;ART.w=ab.w;ART.h=ab.h;applyProjectFonts();
   const href="data:image/svg+xml;base64,"+btoa(unescape(encodeURIComponent(proj.svgText)));
   const d=await imgDims(href).catch(()=>({w:400,h:300}));
   const s=Math.min(ART.w*0.9/d.w,ART.h*0.9/d.h);
   state.objs=[{id:gid(),type:"image",href,x:ART.w/2,y:ART.h/2,w:Math.round(d.w*s),h:Math.round(d.h*s),rot:0,opacity:1,fit:"contain",radius:0,shadow:false,shadowBlur:6,brightness:100,saturate:100,hue:0,tint:null,tintAmt:0}];
-  $("projName").value=uniqueName(proj.name);openEditor();dirty=true;toast(T("svgImported"));
+  $("projName").value=uniqueName(proj.name);openEditor();dirty=true;toast(T("svgAsImage"));
+}
+// Turn an SVG image already on the canvas (dropped/uploaded) into editable objects in place.
+async function ungroupSvgImage(o){
+  const text=decodeSvgDataUrl(o.href);if(!text){toast(T("svgImportFail"),true);return;}
+  let r=null;try{r=await importSvgText(text);}catch(e){console.warn("SVG import failed",e);}
+  if(!r||!r.objs.length){toast(T("svgImportFail"),true);return;}
+  const s=o.fit==="cover"?Math.max(o.w/r.w,o.h/r.h):Math.min(o.w/r.w,o.h/r.h);
+  const a=(o.rot||0)*Math.PI/180,cos=Math.cos(a),sin=Math.sin(a);
+  const mapP=p=>{const dx=(p.x-r.w/2)*s,dy=(p.y-r.h/2)*s;return{x:o.x+dx*cos-dy*sin,y:o.y+dx*sin+dy*cos};};
+  const objs=transformImportedObjs(r.objs,s,mapP,o.rot||0);
+  if(r.bg&&r.bg!=="none")objs.unshift({id:gid(),type:"shape",shapeKind:"rect",x:o.x,y:o.y,w:r.w*s,h:r.h*s,rot:o.rot||0,opacity:1,fill:r.bg,stroke:"none",strokeWidth:0,dash:false,shadow:false,shadowBlur:4});
+  objs.forEach(n=>{n.opacity=+(n.opacity*(o.opacity==null?1:o.opacity)).toFixed(3);});
+  pushHistory();
+  const i=state.objs.indexOf(o);state.objs.splice(i<0?state.objs.length:i,i<0?0:1,...objs);
+  if(r.fontFaces&&r.fontFaces.length){state.fontFaces=[...new Set([...(state.fontFaces||[]),...r.fontFaces])];applyProjectFonts();}
+  state.sel=objs.map(n=>n.id);render();renderProps();toast(T("svgImported").replace("{n}",objs.length));
 }
 function startFolderWatch(){if(isElectron&&window.camrender&&window.camrender.watchDir)window.camrender.watchDir(fileMode()?folderDir():null);}
 async function reloadFolderHome(){if(!fileMode())return;await refreshProjectsCache();if(!$("home").classList.contains("hidden"))renderHome();}
@@ -382,7 +413,8 @@ async function saveProject(silent){
   if(fileMode()){await saveProjectToFolder(name,silent);return;}
   const thumb=await makeThumb();
   const projs=loadProjects();
-  const data={objs:state.objs,bg:state.bg,art:state.art,uploads:state.uploads,seq:state.seq};
+  // (embedded fonts are not kept in app storage — it has a small quota; layout is preserved via textFit)
+  const data={objs:state.objs,bg:state.bg,art:state.art,artSize:state.artSize||null,uploads:state.uploads,seq:state.seq};
   let proj=projs.find(p=>p.id===curProjectId);
   if(!proj){proj={id:curProjectId||("p"+Date.now()),name,updated:Date.now(),thumb,data};curProjectId=proj.id;projs.unshift(proj);}
   else{proj.name=name;proj.updated=Date.now();proj.thumb=thumb;proj.data=data;}
@@ -390,7 +422,7 @@ async function saveProject(silent){
   saveProjects(projs);dirty=false;
   if(!silent)toast(T("saved"));$("autosaveInd").textContent=T("saved");setTimeout(()=>{if($("autosaveInd").textContent===T("saved"))$("autosaveInd").textContent="";},2000);
 }
-function loadProjectData(proj){state.objs=(proj.data&&proj.data.objs)||[];state.bg=(proj.data&&proj.data.bg)||{color:"#FFFFFF",image:null};state.uploads=(proj.data&&proj.data.uploads)||proj.uploads||[];state.art=(proj.data&&proj.data.art)||settings.artboard;const ab=ARTBOARDS[state.art]||ARTBOARDS.slide;ART.w=ab.w;ART.h=ab.h;state.seq=(proj.data&&proj.data.seq)||(maxId()+1);state.sel=[];history.undo.length=0;history.redo.length=0;dirty=false;}
+function loadProjectData(proj){state.objs=(proj.data&&proj.data.objs)||[];state.bg=(proj.data&&proj.data.bg)||{color:"#FFFFFF",image:null};state.uploads=(proj.data&&proj.data.uploads)||proj.uploads||[];state.art=(proj.data&&proj.data.art)||settings.artboard;state.artSize=(proj.data&&proj.data.artSize)||null;state.fontFaces=(proj.data&&proj.data.fontFaces)||[];applyProjectFonts();const ab=artDims(state.art,state.artSize);ART.w=ab.w;ART.h=ab.h;state.seq=(proj.data&&proj.data.seq)||(maxId()+1);state.sel=[];history.undo.length=0;history.redo.length=0;dirty=false;}
 function maxId(){return state.objs.reduce((m,o)=>Math.max(m,+String(o.id).replace(/\D/g,"")||0),0);}
 function uniqueCopyName(base){const names=loadProjects().map(p=>p.name);if(!names.includes(base))return base;let i=2;while(names.includes(base+" "+i))i++;return base+" "+i;}
 async function duplicateProject(id){
@@ -452,7 +484,7 @@ function renderHome(){
 }
 function showHome(){$("editor").classList.add("hidden");$("home").classList.remove("hidden");renderHome();if(fileMode())reloadFolderHome();}
 function openEditor(){$("home").classList.add("hidden");$("editor").classList.remove("hidden");buildTabs();buildLibrary();render();renderProps();updateUndo();fitView();}
-function newProject(){curProjectId=null;state.objs=[];state.bg={color:"#FFFFFF",image:null};state.uploads=[];state.art=settings.artboard;const ab=ARTBOARDS[state.art]||ARTBOARDS.slide;ART.w=ab.w;ART.h=ab.h;state.seq=1;state.sel=[];history.undo.length=0;history.redo.length=0;dirty=false;$("projName").value=uniqueName(T("untitled"));openEditor();}
+function newProject(){curProjectId=null;state.objs=[];state.bg={color:"#FFFFFF",image:null};state.uploads=[];state.art=settings.artboard;state.artSize=null;state.fontFaces=[];applyProjectFonts();const ab=ARTBOARDS[state.art]||ARTBOARDS.slide;ART.w=ab.w;ART.h=ab.h;state.seq=1;state.sel=[];history.undo.length=0;history.redo.length=0;dirty=false;$("projName").value=uniqueName(T("untitled"));openEditor();}
 function openProject(id){const proj=loadProjects().find(p=>p.id===id);if(!proj)return;if(proj.foreign){openForeignSvg(proj);return;}curProjectId=id;loadProjectData(proj);$("projName").value=proj.name;openEditor();}
 function tryGoHome(){if(dirty){openModal("confirmModal");}else showHome();}
 $("homeBtn").onclick=tryGoHome;$("newProjectBtn").onclick=newProject;

@@ -31,6 +31,40 @@ let curProjectId=null, dirty=false;
 const content=$("content"),objlayer=$("objlayer"),overlay=$("overlay"),bglayer=$("bglayer"),stage=$("stage");
 function gid(){return "o"+(state.seq++);}
 function markDirty(){dirty=true;}
+/* ---- rich text (paragraphs imported from SVG) ----
+   o.rich = {text, font, fs0, lines:[{ox, by, len, runs:[{t, rise, w?, fs?, fill?, it?, ff?}]}]}
+   Runs only store what differs from the box style, so box-level colour/bold/font changes still apply.
+   It stays in force while o.text matches; edits inside a single run are spliced in so formatting survives. */
+function richValid(o){return !!(o.rich&&o.rich.text===o.text&&o.rich.font===o.font&&o.rich.lines&&o.rich.lines.length);}
+function richApplyEdit(o,nt){
+  const R=o.rich;if(!richValid(o)||nt===R.text)return;
+  const ot=R.text;let p=0;while(p<ot.length&&p<nt.length&&ot[p]===nt[p])p++;
+  let s=0;while(s<ot.length-p&&s<nt.length-p&&ot[ot.length-1-s]===nt[nt.length-1-s])s++;
+  const del=ot.length-p-s,ins=nt.slice(p,nt.length-s);
+  if(ins.includes("\n")||ot.slice(p,p+del).includes("\n"))return;   // line structure changed → plain fallback
+  let off=0;
+  for(const L of R.lines){
+    for(const r of L.runs){
+      const a=off,b=off+r.t.length;
+      if(p>=a&&p+del<=b){r.t=r.t.slice(0,p-a)+ins+r.t.slice(p-a+del);L.len=null;R.text=nt;return;}
+      off=b;
+    }
+    off+=1;   // the "\n" between lines
+  }
+}
+function textBoxH(o){
+  const fs=o.fontSize;
+  if(richValid(o)){const L=o.rich.lines;return L[L.length-1].by*(fs/o.rich.fs0)+fs*0.3;}
+  const n=String(o.text||"").split("\n").length;
+  return o.lineHeight?(n-1)*fs*o.lineHeight+fs*1.3:Math.max(fs*1.3,n*fs*1.25+8);
+}
+// When a box gets taller/shorter, keep its top edge where it was (the text grows downward).
+function keepTop(o,h0){const d=(o.h-h0)/2;if(!d)return;const a=(o.rot||0)*Math.PI/180;o.x-=Math.sin(a)*d;o.y+=Math.cos(a)*d;}
+function setTextValue(o,v){const h0=o.h;richApplyEdit(o,v);o.text=v;o.h=textBoxH(o);keepTop(o,h0);}
+// Artboard size: a named preset, or a custom size (e.g. an imported A0 poster) in state.artSize.
+function artDims(art,size){return (size&&size.w>0&&size.h>0)?size:(ARTBOARDS[art]||ARTBOARDS.slide);}
+// Fonts embedded by an imported SVG (@font-face rules) are made available to the editor.
+function applyProjectFonts(){let el=document.getElementById("ffProjectFonts");if(!el){el=document.createElement("style");el.id="ffProjectFonts";document.head.appendChild(el);}el.textContent=(state.fontFaces||[]).join("\n");}
 
 const history={undo:[],redo:[]};
 function snapshot(){return JSON.stringify({objs:state.objs,bg:state.bg,seq:state.seq});}
@@ -104,15 +138,35 @@ function objMarkup(o){
   const w=o.w,h=o.h,x=-w/2,y=-h/2;
   if(o.type==="shape"){const sh=o.shadow?`filter="url(#sh-${o.id})"`:"";return defsShadow(o)+shapePath(o.shapeKind,x,y,w,h,o.fill,o.stroke,o.strokeWidth,`${o.dash?`stroke-dasharray="${o.strokeWidth*2.4} ${o.strokeWidth*2}"`:""} ${sh} opacity="${o.opacity}"`);}
   if(o.type==="icon"){const f=colorFilter(o),vb=ICON_VIEWBOXES[o.shapeKind]||"0 0 100 100";return (f.def||"")+`<svg x="${x}" y="${y}" width="${w}" height="${h}" viewBox="${vb}" opacity="${o.opacity}" style="color:${o.fill||'#3A3F45'}" ${f.ref}>${iconSVG(o.shapeKind,o.id)}</svg>`;}
-  if(o.type==="image"){const f=colorFilter(o);const clip=o.radius?`clip-path="inset(0 round ${o.radius}px)"`:"";return (f.def||"")+`<image x="${x}" y="${y}" width="${w}" height="${h}" href="${o.href}" preserveAspectRatio="${o.fit==='contain'?'xMidYMid meet':'xMidYMid slice'}" opacity="${o.opacity}" ${clip} ${f.ref}/>`;}
+  if(o.type==="image"){const f=colorFilter(o);const clip=o.radius?`clip-path="inset(0 round ${o.radius}px)"`:"";return (f.def||"")+`<image x="${x}" y="${y}" width="${w}" height="${h}" href="${o.href}" preserveAspectRatio="${o.fit==='contain'?'xMidYMid meet':o.fit==='fill'?'none':'xMidYMid slice'}" opacity="${o.opacity}" ${clip} ${f.ref}/>`;}
+  // Vector fragment imported from another SVG (paths, clipped charts, glyph <use>s…); vb = its own bounding box.
+  if(o.type==="svg"){const vb=o.vb||[0,0,w,h];return `${o.css?`<style>${o.css}</style>`:""}<svg x="${x}" y="${y}" width="${w}" height="${h}" viewBox="${vb.join(" ")}" preserveAspectRatio="none" overflow="visible" opacity="${o.opacity}"><rect x="${vb[0]}" y="${vb[1]}" width="${vb[2]}" height="${vb[3]}" fill="#fff" fill-opacity="0"/><g class="${o.scope||""}">${o.markup||""}</g></svg>`;}
   if(o.type==="text"){
     if(o._editing)return "";   // hidden while the inline editor is open, so text isn't drawn twice
-    const lines=String(o.text||"").split("\n"),lh=o.fontSize*1.25;
+    const lines=String(o.text||"").split("\n"),lh=o.fontSize*(o.lineHeight||1.25);
     const anchor=o.align==="center"?"middle":o.align==="right"?"end":"start";
     const tx=o.align==="center"?0:o.align==="right"?w/2:-w/2;
     const ital=o.italic?`font-style="italic"`:"",deco=o.underline?`text-decoration="underline"`:"";
     let t=`<text text-anchor="${anchor}" font-family="${o.font||FONTS[0][0]}" font-size="${o.fontSize}" font-weight="${o.weight}" ${ital} ${deco} fill="${o.fill}" opacity="${o.opacity}" style="white-space:pre">`;
-    lines.forEach((ln,i)=>{t+=`<tspan x="${tx}" y="${-h/2+o.fontSize+i*lh}" ${deco}>${escapeXml(ln||" ")}</tspan>`;});
+    // Rich paragraph (imported): per-run bold/size/colour/superscript and the original line positions.
+    if(richValid(o)){
+      const R=o.rich,k=o.fontSize/R.fs0;
+      for(const L of R.lines){
+        const lx=tx+L.ox*k,ly=-h/2+L.by*k;
+        t+=`<tspan x="${lx}" y="${ly}" ${deco}${L.len?` textLength="${L.len*k}" lengthAdjust="spacingAndGlyphs"`:""}>`;
+        for(const r of L.runs){
+          let a=`y="${ly+(r.rise||0)*k}"`;
+          if(r.w!=null)a+=` font-weight="${r.w}"`;if(r.fs!=null)a+=` font-size="${r.fs*k}"`;if(r.fill)a+=` fill="${r.fill}"`;
+          if(r.it!=null)a+=` font-style="${r.it?"italic":"normal"}"`;if(r.ff)a+=` font-family="${r.ff}"`;
+          t+=`<tspan ${a}>${escapeXml(r.t)}</tspan>`;
+        }
+        t+=`</tspan>`;
+      }
+      return t+`</text>`;
+    }
+    // Imported text keeps its original run width until the text, size or font is changed.
+    const tf=o.textFit,fit=tf&&lines.length===1&&tf.text===o.text&&Math.abs(tf.fs-o.fontSize)<0.01&&tf.font===o.font?` textLength="${tf.len}" lengthAdjust="spacingAndGlyphs"`:"";
+    lines.forEach((ln,i)=>{t+=`<tspan x="${tx}" y="${-h/2+o.fontSize+i*lh}" ${deco}${fit}>${escapeXml(ln||" ")}</tspan>`;});
     return t+`</text>`;
   }
   return "";
@@ -120,14 +174,61 @@ function objMarkup(o){
 function defsShadow(o){if(!o.shadow)return"";return `<defs><filter id="sh-${o.id}" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="2" stdDeviation="${o.shadowBlur||4}" flood-color="#000" flood-opacity="0.22"/></filter></defs>`;}
 function escapeXml(s){return s.replace(/[<>&]/g,c=>({"<":"&lt;",">":"&gt;","&":"&amp;"}[c]));}
 
-function render(){
-  const v=state.view;content.setAttribute("transform",`translate(${v.tx},${v.ty}) scale(${v.zoom})`);
-  const bgImg=state.bg.image?`<image x="0" y="0" width="${ART.w}" height="${ART.h}" href="${state.bg.image}" preserveAspectRatio="xMidYMid slice"/>`:"";
-  bglayer.innerHTML=`<rect x="-6" y="-6" width="${ART.w+12}" height="${ART.h+12}" rx="10" fill="#000" opacity="0.05"/><rect x="0" y="0" width="${ART.w}" height="${ART.h}" fill="${state.bg.color}"/>${bgImg}<rect x="0" y="0" width="${ART.w}" height="${ART.h}" fill="none" stroke="#E0DCCF" stroke-width="1"/>`;
-  let html="";
-  for(const o of state.objs){if(o.type==="connector"){html+=connectorMarkup(o);continue;}html+=`<g class="obj" data-id="${o.id}" transform="translate(${o.x},${o.y}) rotate(${o.rot||0})">${objMarkup(o)}</g>`;}
-  objlayer.innerHTML=html;renderOverlay();
+/* ---- rendering ----
+   Incremental: each object keeps its own DOM node. Moving only rewrites its transform; only
+   objects whose content changed are re-drawn, and big images / vector pieces just get their
+   size attributes patched when resized — so multi-MB data URLs are never re-parsed per frame. */
+const objCache=new Map();   // id -> {el, kind, sig, href, markup, css, geo, tf, m}
+let bgKey="";
+let frameReq=0,frameProps=false,frameMode="";   // pending animation-frame paint
+const SIG_SKIP=new Set(["x","y","rot","href","markup","css"]);
+function objSig(o,skipGeo){return JSON.stringify(o,function(k,v){return (this===o&&(SIG_SKIP.has(k)||(skipGeo&&(k==="w"||k==="h"))))?undefined:v;});}
+function patchGeometry(c,o){   // resize an image / vector piece without rebuilding its (heavy) markup
+  const sel=o.type==="image"?":scope > image":":scope > svg";const el=c.el.querySelector(sel);if(!el)return false;
+  el.setAttribute("x",-o.w/2);el.setAttribute("y",-o.h/2);el.setAttribute("width",o.w);el.setAttribute("height",o.h);return true;
 }
+function renderView(){const v=state.view;content.setAttribute("transform",`translate(${v.tx},${v.ty}) scale(${v.zoom})`);renderOverlay();}
+function render(){
+  let pendingProps=false;   // a direct render supersedes any queued frame (but keeps its props refresh)
+  if(frameReq){cancelAnimationFrame(frameReq);frameReq=0;frameMode="";pendingProps=frameProps;frameProps=false;}
+  const v=state.view;content.setAttribute("transform",`translate(${v.tx},${v.ty}) scale(${v.zoom})`);
+  const bk=ART.w+"|"+ART.h+"|"+state.bg.color+"|"+(state.bg.image?state.bg.image.length+":"+state.bg.image.slice(-40):"");
+  if(bk!==bgKey){
+    const bgImg=state.bg.image?`<image x="0" y="0" width="${ART.w}" height="${ART.h}" href="${state.bg.image}" preserveAspectRatio="xMidYMid slice"/>`:"";
+    bglayer.innerHTML=`<rect x="-6" y="-6" width="${ART.w+12}" height="${ART.h+12}" rx="10" fill="#000" opacity="0.05"/><rect x="0" y="0" width="${ART.w}" height="${ART.h}" fill="${state.bg.color}"/>${bgImg}<rect x="0" y="0" width="${ART.w}" height="${ART.h}" fill="none" stroke="#E0DCCF" stroke-width="1"/>`;
+    bgKey=bk;
+  }
+  const live=new Set();let prev=null;
+  for(const o of state.objs){
+    live.add(o.id);let c=objCache.get(o.id);const kind=o.type==="connector"?"conn":"obj";
+    if(!c||c.kind!==kind){
+      if(c)c.el.remove();
+      const el=document.createElementNS(SVGNS,"g");
+      if(kind==="obj"){el.setAttribute("class","obj");el.setAttribute("data-id",o.id);}
+      c={kind,el};objCache.set(o.id,c);
+    }
+    if(kind==="conn"){const m=connectorMarkup(o);if(c.m!==m){c.el.innerHTML=m;c.m=m;}}
+    else{
+      const sig=objSig(o),same=c.href===o.href&&c.markup===o.markup&&c.css===o.css;
+      if(c.sig!==sig||!same){
+        const heavy=o.type==="image"||o.type==="svg",geo=heavy?objSig(o,true):null;
+        if(!(same&&heavy&&c.sig&&c.geo===geo&&patchGeometry(c,o)))c.el.innerHTML=objMarkup(o);
+        c.sig=sig;c.geo=geo;c.href=o.href;c.markup=o.markup;c.css=o.css;
+      }
+      const tf=`translate(${o.x},${o.y}) rotate(${o.rot||0})`;if(c.tf!==tf){c.el.setAttribute("transform",tf);c.tf=tf;}
+    }
+    const want=prev?prev.nextSibling:objlayer.firstChild;if(c.el!==want)objlayer.insertBefore(c.el,want);
+    prev=c.el;
+  }
+  for(const [id,c] of objCache)if(!live.has(id)){c.el.remove();objCache.delete(id);}
+  let n=prev?prev.nextSibling:objlayer.firstChild;while(n){const nx=n.nextSibling;n.remove();n=nx;}
+  renderOverlay();
+  if(pendingProps&&typeof renderPropsLight==="function")renderPropsLight();
+}
+/* Coalesce high-frequency input (pointer moves, trackpad wheel/pinch) into one paint per display frame. */
+function frameRender(withProps){if(withProps)frameProps=true;frameMode="full";if(!frameReq)frameReq=requestAnimationFrame(runFrame);}
+function frameView(){if(!frameMode)frameMode="view";if(!frameReq)frameReq=requestAnimationFrame(runFrame);}
+function runFrame(){const mode=frameMode,p=frameProps;frameReq=0;frameMode="";frameProps=false;if(mode==="full"){render();if(p)renderPropsLight();}else renderView();}
 function groupBBox(objs){let mnx=1e9,mny=1e9,mxx=-1e9,mxy=-1e9,f=false;for(const o of objs){if(o.type==="connector"){const e=connEndpoints(o);if(e)for(const p of[e.p1,e.p2]){mnx=Math.min(mnx,p.x);mny=Math.min(mny,p.y);mxx=Math.max(mxx,p.x);mxy=Math.max(mxy,p.y);f=true;}continue;}const a=(o.rot||0)*Math.PI/180,c=Math.cos(a),s=Math.sin(a);for(const sg of[[-1,-1],[1,-1],[1,1],[-1,1]]){const lx=sg[0]*o.w/2,ly=sg[1]*o.h/2,px=o.x+lx*c-ly*s,py=o.y+lx*s+ly*c;mnx=Math.min(mnx,px);mny=Math.min(mny,py);mxx=Math.max(mxx,px);mxy=Math.max(mxy,py);f=true;}}return f?{x:mnx,y:mny,w:mxx-mnx,h:mxy-mny}:null;}
 function renderOverlay(){
   const z=state.view.zoom,hs=5.25/z,rs=4.5/z;let html="";const sel=selObjs();
@@ -386,7 +487,7 @@ function onPointerDown(e){
   const _now=Date.now(),_dbl=e.button===0&&lastClick&&(_now-lastClick.t<360)&&Math.abs(e.clientX-lastClick.x)<7&&Math.abs(e.clientY-lastClick.y)<7;
   lastClick={t:_now,x:e.clientX,y:e.clientY};
   if(_dbl){
-    if(objEl){const od=objById(objEl.getAttribute("data-id"));if(od&&od.type==="text"){try{startEditText(od);}catch(err){}return;}}
+    if(objEl){const od=objById(objEl.getAttribute("data-id"));if(od&&od.type==="text"){try{startEditText(od,{x:e.clientX,y:e.clientY});}catch(err){}return;}}
     else{const od=addText(pt.x,pt.y,"Text");try{startEditText(od);}catch(err){}return;}
   }
   const mod=e.shiftKey||e.metaKey||e.ctrlKey;   // Shift or Cmd(Mac)/Ctrl = toggle individual objects in/out of the selection
@@ -403,11 +504,11 @@ function startGroupResize(dir,pt){const sel=selObjs(),bb=groupBBox(sel);if(!bb)r
 
 function onPointerMove(e){
   if(!drag)return;const pt=toCanvas(e);
-  if(drag.kind==="move"){const dx=pt.x-drag.start.x,dy=pt.y-drag.start.y;if(Math.abs(dx)+Math.abs(dy)>1)drag.moved=true;for(const it of drag.items){it.o.x=it.ox+dx;it.o.y=it.oy+dy;}for(const it of drag.conns){if(it.fp)it.o.fromPt={x:it.fp.x+dx,y:it.fp.y+dy};if(it.tp)it.o.toPt={x:it.tp.x+dx,y:it.tp.y+dy};}render();renderPropsLight();return;}
-  if(drag.kind==="resize"){const{o,sa,a,anchorWorld}=drag;const loc=rot(pt.x-anchorWorld.x,pt.y-anchorWorld.y,-a);let nW=drag.keepX?drag.W0:Math.max(14,Math.abs(loc.x)),nH=drag.keepY?drag.H0:Math.max(14,Math.abs(loc.y));if(e.shiftKey&&!drag.keepX&&!drag.keepY){const ar=drag.W0/drag.H0;if(nW/nH>ar)nH=nW/ar;else nW=nH*ar;}const cw=rot(-sa.x*nW/2,-sa.y*nH/2,a);o.w=nW;o.h=nH;o.x=anchorWorld.x+cw.x;o.y=anchorWorld.y+cw.y;render();renderPropsLight();return;}
+  if(drag.kind==="move"){const dx=pt.x-drag.start.x,dy=pt.y-drag.start.y;if(Math.abs(dx)+Math.abs(dy)>1)drag.moved=true;for(const it of drag.items){it.o.x=it.ox+dx;it.o.y=it.oy+dy;}for(const it of drag.conns){if(it.fp)it.o.fromPt={x:it.fp.x+dx,y:it.fp.y+dy};if(it.tp)it.o.toPt={x:it.tp.x+dx,y:it.tp.y+dy};}frameRender(true);return;}
+  if(drag.kind==="resize"){const{o,sa,a,anchorWorld}=drag;const loc=rot(pt.x-anchorWorld.x,pt.y-anchorWorld.y,-a);let nW=drag.keepX?drag.W0:Math.max(14,Math.abs(loc.x)),nH=drag.keepY?drag.H0:Math.max(14,Math.abs(loc.y));if(e.shiftKey&&!drag.keepX&&!drag.keepY){const ar=drag.W0/drag.H0;if(nW/nH>ar)nH=nW/ar;else nW=nH*ar;}const cw=rot(-sa.x*nW/2,-sa.y*nH/2,a);o.w=nW;o.h=nH;o.x=anchorWorld.x+cw.x;o.y=anchorWorld.y+cw.y;frameRender(true);return;}
   if(drag.kind==="gresize"){const a=drag.anchor,oldD=Math.hypot(drag.oc.x-a.x,drag.oc.y-a.y)||1;let s=clamp(Math.hypot(pt.x-a.x,pt.y-a.y)/oldD,6/drag.minDim,12);for(const it of drag.snap){const o=it.o;if(o.type==="connector"){if(it.fromPt)o.fromPt={x:a.x+(it.fromPt.x-a.x)*s,y:a.y+(it.fromPt.y-a.y)*s};if(it.toPt)o.toPt={x:a.x+(it.toPt.x-a.x)*s,y:a.y+(it.toPt.y-a.y)*s};if(it.sw!=null)o.strokeWidth=Math.max(0.5,it.sw*s);continue;}o.x=a.x+(it.x-a.x)*s;o.y=a.y+(it.y-a.y)*s;o.w=it.w*s;o.h=it.h*s;if(it.fs!=null)o.fontSize=Math.max(4,it.fs*s);if(it.sw!=null)o.strokeWidth=Math.max(0.4,it.sw*s);if(it.pts)o._points=scalePoly(it.pts,{x:0,y:0},s);}render();return;}
   if(drag.kind==="grotate"){let ang=Math.atan2(pt.y-drag.gc.y,pt.x-drag.gc.x);let dd=(ang-drag.start)*180/Math.PI;if(e.shiftKey)dd=Math.round(dd/15)*15;for(const it of drag.snap)it.o.rot=Math.round((it.rot0+dd)*10)/10;render();return;}
-  if(drag.kind==="rotate"){let ang=Math.atan2(pt.y-drag.o.y,pt.x-drag.o.x),deg=drag.rot0+(ang-drag.start)*180/Math.PI;if(e.shiftKey)deg=Math.round(deg/15)*15;drag.o.rot=Math.round(deg*10)/10;render();renderPropsLight();return;}
+  if(drag.kind==="rotate"){let ang=Math.atan2(pt.y-drag.o.y,pt.x-drag.o.x),deg=drag.rot0+(ang-drag.start)*180/Math.PI;if(e.shiftKey)deg=Math.round(deg/15)*15;drag.o.rot=Math.round(deg*10)/10;frameRender(true);return;}
   if(drag.kind==="connend"){
     const cand=nearestConnectShape(pt,drag.o);
     let snap=null,best=1e9,hints=[];
@@ -431,7 +532,14 @@ function drawMarquee(){const a=drag.start,b=drag.cur;if(!b)return;const x=Math.m
 function finishMarquee(){const a=drag.start,b=drag.cur;if(!b)return;const x=Math.min(a.x,b.x),y=Math.min(a.y,b.y),x2=Math.max(a.x,b.x),y2=Math.max(a.y,b.y);const hit=state.objs.filter(o=>{if(o.type==="connector"){const e=connEndpoints(o);if(!e)return false;const mx=(e.p1.x+e.p2.x)/2,my=(e.p1.y+e.p2.y)/2;return mx>=x&&mx<=x2&&my>=y&&my<=y2;}return o.x>=x&&o.x<=x2&&o.y>=y&&o.y<=y2;}).map(o=>o.id);state.sel=drag.add?[...new Set([...state.sel,...hit])]:hit;render();renderProps();}
 
 /* wheel: scroll = pan; shift = horizontal; ctrl/meta = zoom */
-stage.addEventListener("wheel",e=>{e.preventDefault();if(e.ctrlKey||e.metaKey){const r=stage.getBoundingClientRect();setZoom(state.view.zoom*(e.deltaY<0?1.1:0.9),e.clientX-r.left,e.clientY-r.top);}else if(e.shiftKey){state.view.tx-=(e.deltaY||e.deltaX);render();}else{state.view.tx-=e.deltaX;state.view.ty-=e.deltaY;render();}},{passive:false});
+stage.addEventListener("wheel",e=>{e.preventDefault();
+  const px=e.deltaMode===1?16:e.deltaMode===2?400:1,dx=e.deltaX*px,dy=e.deltaY*px;
+  if(e.ctrlKey||e.metaKey){   // pinch / ctrl+wheel: zoom proportionally to the gesture, not in fixed 10% jumps
+    const r=stage.getBoundingClientRect(),f=Math.exp(-dy*(Math.abs(dy)<40?0.012:0.0022));
+    setZoom(state.view.zoom*f,e.clientX-r.left,e.clientY-r.top);
+  }else if(e.shiftKey){state.view.tx-=(dy||dx);frameView();}
+  else{state.view.tx-=dx;state.view.ty-=dy;frameView();}
+},{passive:false});
 
 /* double-click empty = text; on text = edit */
 // (double-click handling is done via manual detection in onPointerDown, which works in all builds)
@@ -439,30 +547,99 @@ function addTextAtCenter(){const r=stage.getBoundingClientRect();const pt=toCanv
 
 /* inline text editor */
 let activeEditor=null;
-function startEditText(o){
+/* ---- inline text editor ----
+   A contenteditable box laid exactly over the (hidden) SVG text: same on-screen size, line positions,
+   line widths, bold/size/colour runs and superscripts — so editing looks like the canvas, at any zoom.
+   Each line is a <div> carrying its spacing (data-gap), x offset and original width; each styled run is a
+   <span data-run> carrying its style, so typing inside a run keeps its formatting. */
+function edEsc(v){return String(v).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function startEditText(o,clientPt){
   if(activeEditor)return;
   o._editing=true;render();
-  const z=state.view.zoom;
-  // place the editor exactly over the (now hidden) text box using canvas→screen coords
-  let left=80,top=80;
-  try{const ctm=content.getScreenCTM();if(ctm){const p=stage.createSVGPoint();p.x=o.x-o.w/2;p.y=o.y-o.h/2;const s=p.matrixTransform(ctm);left=s.x;top=s.y;}}catch(e){}
-  const width=Math.max(o.w*z,60);
-  const fpx=Math.max(o.fontSize*z,11);
-  const ta=document.createElement("textarea");ta.className="inline-editor";ta.value=o.text;ta.spellcheck=false;
-  Object.assign(ta.style,{left:left+"px",top:top+"px",width:width+"px",minHeight:(fpx*1.3)+"px",transformOrigin:"top left",transform:'rotate('+(o.rot||0)+'deg)',fontFamily:o.font||FONTS[0][0],fontSize:fpx+"px",fontWeight:o.weight,fontStyle:o.italic?"italic":"normal",textDecoration:o.underline?"underline":"none",color:o.fill,textAlign:o.align,lineHeight:1.25});
-  document.body.appendChild(ta);
+  const z=state.view.zoom,fs=o.fontSize,fpx=fs*z,rich=richValid(o),k=rich?fs/o.rich.fs0:1,lh=fs*(o.lineHeight||1.25);
+  // model → lines in canvas units at the current font size
+  const lines=rich?o.rich.lines.map((L,i)=>({gap:i?(L.by-o.rich.lines[i-1].by)*k:L.by*k,ox:L.ox*k,len:L.len?L.len*k:null,
+      runs:L.runs.map(r=>({t:r.t,rise:(r.rise||0)*k,w:r.w,fs:r.fs!=null?r.fs*k:null,fill:r.fill,it:r.it,ff:r.ff}))}))
+    :String(o.text||"").split("\n").map((t,i)=>({gap:i?lh:fs,ox:0,len:null,runs:[{t,rise:0}]}));
+  // where the first baseline sits inside a line box of height fpx, for this font
+  const probe=document.createElement("div");
+  probe.style.cssText=`position:fixed;left:-9999px;top:0;white-space:pre;line-height:${fpx}px;font-family:${o.font||FONTS[0][0]};font-size:${fpx}px;font-weight:${o.weight}`;
+  probe.innerHTML='Hg<span style="display:inline-block;width:0;height:0"></span>';document.body.appendChild(probe);
+  const b0=probe.lastChild.offsetTop;probe.remove();
+  const ed=document.createElement("div");ed.className="inline-editor";ed.contentEditable="true";ed.spellcheck=false;
+  let prevTop=0,html="";
+  lines.forEach((L,i)=>{
+    const top=(lines.slice(0,i+1).reduce((a,x)=>a+x.gap,0))*z-b0,mt=i?top-(prevTop+fpx):top;prevTop=top;
+    const orig=L.runs.map(r=>r.t).join("");
+    html+=`<div data-gap="${L.gap}" data-ox="${L.ox}"${L.len?` data-len="${L.len}"`:""} data-orig="${edEsc(orig)}" style="margin-top:${mt}px;height:${fpx}px;line-height:${fpx}px;position:relative;left:${L.ox*z}px">`;
+    for(const r of L.runs){
+      let st="",da=` data-run="1" data-rise="${r.rise}"`;
+      if(r.w!=null){st+=`font-weight:${r.w};`;da+=` data-w="${r.w}"`;}
+      if(r.fs!=null){st+=`font-size:${r.fs*z}px;`;da+=` data-fs="${r.fs}"`;}
+      if(r.fill){st+=`color:${r.fill};`;da+=` data-fill="${edEsc(r.fill)}"`;}
+      if(r.it!=null){st+=`font-style:${r.it?"italic":"normal"};`;da+=` data-it="${r.it?1:0}"`;}
+      if(r.ff){st+=`font-family:${edEsc(r.ff)};`;da+=` data-ff="${edEsc(r.ff)}"`;}
+      if(r.rise)st+=`position:relative;top:${r.rise*z}px;`;
+      html+=`<span${da} style="${st}">${edEsc(r.t)}</span>`;
+    }
+    html+=(orig?"":"<br>")+"</div>";
+  });
+  ed.innerHTML=html;
+  // place over the box (rotation about the box centre, like the canvas)
+  const W=o.w*z,H=o.h*z;let cx=80+W/2,cy=80+H/2;
+  try{const ctm=content.getScreenCTM();if(ctm){const p=stage.createSVGPoint();p.x=o.x;p.y=o.y;const q=p.matrixTransform(ctm);cx=q.x;cy=q.y;}}catch(e){}
+  Object.assign(ed.style,{left:(cx-W/2)+"px",top:(cy-H/2)+"px",width:W+"px",minHeight:H+"px",fontFamily:o.font||FONTS[0][0],fontSize:fpx+"px",fontWeight:o.weight,
+    fontStyle:o.italic?"italic":"normal",textDecoration:o.underline?"underline":"none",color:o.fill,textAlign:o.align||"left"});
+  document.body.appendChild(ed);
+  // lines with a fixed original width: spread letters to that width (as the canvas does), until edited
+  ed.querySelectorAll(":scope > div[data-len]").forEach(d=>{const r=document.createRange();r.selectNodeContents(d);const nat=r.getBoundingClientRect().width,n=Math.max(1,d.textContent.length);
+    const ls=Math.max(-fpx*0.3,Math.min(fpx*0.3,(+d.dataset.len*z-nat)/n));if(Math.abs(ls)>0.01)d.style.letterSpacing=ls+"px";});
+  ed.style.transformOrigin=`${W/2}px ${H/2}px`;ed.style.transform=`rotate(${o.rot||0}deg)`;
   const openAt=Date.now();
-  activeEditor={ta,o,pre:snapshot()};
-  const grow=()=>{ta.style.height="auto";ta.style.height=Math.max(fpx*1.3,ta.scrollHeight)+"px";};
-  grow();
-  // focus + SELECT ALL (typing overwrites), deferred so it sticks after the opening click
-  setTimeout(()=>{try{ta.focus();ta.select();}catch(e){}},0);
-  ta.addEventListener("input",()=>{o.text=ta.value;o.h=Math.max(o.fontSize*1.3,ta.value.split("\n").length*o.fontSize*1.25+8);grow();});
-  // ignore the blur that the opening click can trigger; commit on a real blur later
-  ta.addEventListener("blur",()=>{if(activeEditor&&activeEditor.ta===ta){if(Date.now()-openAt<260){setTimeout(()=>{try{ta.focus();}catch(e){}},0);}else commitTextEditor();}});
-  ta.addEventListener("keydown",ev=>{ev.stopPropagation();if(ev.metaKey||ev.ctrlKey){const k=ev.key.toLowerCase();if(k==="b"){ev.preventDefault();o.weight=o.weight>=700?400:700;ta.style.fontWeight=o.weight;return;}if(k==="i"){ev.preventDefault();o.italic=!o.italic;ta.style.fontStyle=o.italic?"italic":"normal";return;}if(k==="u"){ev.preventDefault();o.underline=!o.underline;ta.style.textDecoration=o.underline?"underline":"none";return;}}if(ev.key==="Escape"){ev.preventDefault();commitTextEditor();}});
+  activeEditor={ta:ed,o,pre:snapshot(),rich};
+  // caret where the user double-clicked; otherwise select everything (new / placeholder text)
+  setTimeout(()=>{try{ed.focus();const sel=getSelection();let r=null;
+    if(clientPt&&document.caretRangeFromPoint){r=document.caretRangeFromPoint(clientPt.x,clientPt.y);if(r&&!ed.contains(r.startContainer))r=null;}
+    if(!r){r=document.createRange();r.selectNodeContents(ed);}sel.removeAllRanges();sel.addRange(r);}catch(e){}},0);
+  ed.addEventListener("input",()=>{ed.querySelectorAll(":scope > div").forEach(d=>{if(d.style.letterSpacing&&d.textContent!==d.dataset.orig)d.style.letterSpacing="";});});
+  ed.addEventListener("paste",ev=>{ev.preventDefault();const t=(ev.clipboardData||window.clipboardData).getData("text/plain");document.execCommand("insertText",false,t);});
+  ed.addEventListener("blur",()=>{if(activeEditor&&activeEditor.ta===ed){if(Date.now()-openAt<260){setTimeout(()=>{try{ed.focus();}catch(e){}},0);}else commitTextEditor();}});
+  ed.addEventListener("keydown",ev=>{ev.stopPropagation();
+    if(ev.metaKey||ev.ctrlKey){const kk=ev.key.toLowerCase();   // box-level style toggles (not browser rich-text markup)
+      if(kk==="b"){ev.preventDefault();o.weight=o.weight>=700?400:700;ed.style.fontWeight=o.weight;return;}
+      if(kk==="i"){ev.preventDefault();o.italic=!o.italic;ed.style.fontStyle=o.italic?"italic":"normal";return;}
+      if(kk==="u"){ev.preventDefault();o.underline=!o.underline;ed.style.textDecoration=o.underline?"underline":"none";return;}}
+    if(ev.key==="Escape"){ev.preventDefault();commitTextEditor();}});
 }
-function commitTextEditor(){if(!activeEditor)return;const{ta,o,pre}=activeEditor;const v=ta.value;activeEditor=null;ta.remove();o._editing=false;if(!v.length){state.objs=state.objs.filter(x=>x!==o);state.sel=[];render();renderProps();return;}o.text=v;o.h=Math.max(o.fontSize*1.3,v.split("\n").length*o.fontSize*1.25+8);commitPre(pre);render();renderProps();}
+// Read the editor back into {text, rich, h}. Lines get their baseline from the accumulated gaps, so
+// inserting or deleting lines moves the following lines exactly as they appeared while editing.
+function readEditor(ed,o,wasRich,apply){
+  const fs=o.fontSize,lh=fs*(o.lineHeight||1.25),lines=[];let cur=null;
+  const start=blk=>{cur={gap:blk&&blk.dataset&&blk.dataset.gap!=null?+blk.dataset.gap:NaN,ox:blk&&blk.dataset?+(blk.dataset.ox||0):0,
+    orig:blk&&blk.dataset?blk.dataset.orig:null,len:blk&&blk.dataset&&blk.dataset.len?+blk.dataset.len:null,runs:[]};lines.push(cur);};
+  const same=(a,b)=>a.w===b.w&&a.fs===b.fs&&a.fill===b.fill&&a.it===b.it&&a.ff===b.ff&&Math.abs(a.rise-b.rise)<1e-6;
+  const addText=(t,node,blk)=>{if(!cur)start(blk);if(!t)return;const sp=node.parentElement&&node.parentElement.closest("[data-run]");const d=sp&&ed.contains(sp)?sp.dataset:{};
+    const r={t,rise:+(d.rise||0)};if(d.w)r.w=+d.w;if(d.fs)r.fs=+d.fs;if(d.fill)r.fill=d.fill;if(d.it!=null&&d.it!=="")r.it=d.it==="1";if(d.ff)r.ff=d.ff;
+    const last=cur.runs[cur.runs.length-1];if(last&&same(last,r))last.t+=t;else cur.runs.push(r);};
+  const walk=(node,blk)=>{for(const n of Array.from(node.childNodes)){
+    if(n.nodeType===3)addText(n.textContent.replace(/[\r\n]/g,""),n,blk);
+    else if(n.nodeName==="BR"){if(n.nextSibling||n.parentNode===ed){if(!cur)start(blk);cur=null;start(null);}}   // a trailing <br> is just an empty-line placeholder
+    else if(n.nodeName==="DIV"||n.nodeName==="P"){cur=null;start(n);walk(n,n);cur=null;}
+    else if(n.nodeType===1)walk(n,blk);}};
+  walk(ed,null);
+  if(!lines.length)start(null);
+  let by=0;lines.forEach((L,i)=>{const g=isNaN(L.gap)?(i?lh:fs):L.gap;by=i?by+g:g;L.by=by;L.text=L.runs.map(r=>r.t).join("");if(L.len&&L.text!==L.orig)L.len=null;});
+  const text=lines.map(L=>L.text).join("\n");
+  const res={text,h:Math.max(fs*1.3,lines[lines.length-1].by+fs*0.3)};
+  const styled=wasRich||lines.some(L=>L.runs.some(r=>r.w!=null||r.fs!=null||r.fill||r.it!=null||r.ff||r.rise));
+  if(styled)res.rich={text,font:o.font,fs0:fs,lines:lines.map(L=>({ox:L.ox,by:L.by,len:L.len,runs:L.runs.map(r=>Object.assign({},r))}))};
+  if(apply){const h0=o.h;o.text=text;if(styled){o.rich=res.rich;o.h=res.h;}else{o.rich=null;o.h=textBoxH(o);}keepTop(o,h0);}
+  return res;
+}
+function commitTextEditor(){if(!activeEditor)return;const{ta:ed,o,pre,rich}=activeEditor;activeEditor=null;
+  const v=readEditor(ed,o,rich,false);ed.remove();o._editing=false;
+  if(!v.text.trim().length){state.objs=state.objs.filter(x=>x!==o);state.sel=[];render();renderProps();return;}
+  readEditor(ed,o,rich,true);commitPre(pre);render();renderProps();}
 
 /* ============================ CONTEXT MENU ============================ */
 function onContextMenu(e){e.preventDefault();const oe=e.target.closest("[data-id]");if(oe){const id=oe.getAttribute("data-id");if(!isSel(id)){state.sel=[id];render();renderProps();}}openCtx(e.clientX,e.clientY);}
@@ -505,7 +682,7 @@ function distribute(){const sel=selObjs().filter(o=>o.type!=="connector");if(sel
 let renderProps=function(){}, renderPropsLight=function(){};
 
 /* ============================ ZOOM ============================ */
-function setZoom(z,cx,cy){const v=state.view,old=v.zoom;z=clamp(z,0.15,5);const r=stage.getBoundingClientRect();cx=cx==null?r.width/2:cx;cy=cy==null?r.height/2:cy;v.tx=cx-(cx-v.tx)*(z/old);v.ty=cy-(cy-v.ty)*(z/old);v.zoom=z;$("zoomVal").textContent=Math.round(z*100)+"%";render();}
+function setZoom(z,cx,cy){const v=state.view,old=v.zoom;z=clamp(z,0.15,5);const r=stage.getBoundingClientRect();cx=cx==null?r.width/2:cx;cy=cy==null?r.height/2:cy;v.tx=cx-(cx-v.tx)*(z/old);v.ty=cy-(cy-v.ty)*(z/old);v.zoom=z;$("zoomVal").textContent=Math.round(z*100)+"%";frameView();}
 function fitView(){const r=stage.getBoundingClientRect();const pad=70,z=Math.min((r.width-pad)/ART.w,(r.height-pad)/ART.h);state.view.zoom=clamp(z,0.15,5);state.view.tx=(r.width-ART.w*state.view.zoom)/2;state.view.ty=(r.height-ART.h*state.view.zoom)/2;$("zoomVal").textContent=Math.round(state.view.zoom*100)+"%";render();}
 $("zoomIn").onclick=()=>setZoom(state.view.zoom*1.2);$("zoomOut").onclick=()=>setZoom(state.view.zoom/1.2);$("zoomFit").onclick=fitView;
 $("undoBtn").onclick=undo;$("redoBtn").onclick=redo;
